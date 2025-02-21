@@ -3,38 +3,38 @@
 #' @description
 #' A versatile function for performing non-linear least squares optimization on grouped data.
 #' It supports customizable optimization methods, flexible initial/fixed parameters, and parallel processing.
-#' @param data A `data.frame` containing the input data for analysis.
-#' @param x The name of the column in `data` representing the independent variable (x points).
-#' @param y The name of the column in `data` containing the dependent variable to analyze (response variable).
-#' @param grp Column(s) in `data` used as grouping variable(s). Defaults to `NULL`. (optional)
-#' @param keep Names of columns to retain in the output. Defaults to `NULL`. (Optional)
+#' @param data A \code{data.frame} containing the input data for analysis.
+#' @param x The name of the column in \code{data} representing the independent variable (x points).
+#' @param y The name of the column in \code{data} containing the dependent variable to analyze (response variable).
+#' @param grp Column(s) in \code{data} used as grouping variable(s). Defaults to \code{NULL}. (Optional)
+#' @param keep Names of columns to retain in the output. Defaults to \code{NULL}. (Optional)
 #' @param fn A string. The name of the function used for curve fitting.
-#'   Example: `"fn_linear_sat"`. Defaults to \code{"fn_linear_sat"}.
-#' @param parameters A numeric vector, named list, or `data.frame` providing initial values for parameters:
+#'   Example: \code{"fn_lin"}. Defaults to \code{"fn_linear_sat"}.
+#' @param parameters A numeric vector, named list, or \code{data.frame} providing initial values for parameters:
 #'   \describe{
-#'     \item{Numeric vector}{Named vector specifying initial values (e.g., `c(k = 0.5, t1 = 30)`).}
-#'     \item{Data frame}{Requires a `uid` column with group IDs and parameter values for each group.}
-#'     \item{List}{Named list where parameter values can be numeric or expressions (e.g., `list(k = "max(y)", t1 = 40)`).}
+#'     \item{Numeric vector}{Named vector specifying initial values (e.g., \code{c(k = 0.5, t1 = 30)}).}
+#'     \item{Data frame}{Requires a \code{uid} column with group IDs and parameter values for each group.}
+#'     \item{List}{Named list where parameter values can be numeric or expressions (e.g., \code{list(k = "max(y)", t1 = 40)}).}
 #'   }
-#'   Defaults to `NULL`.
-#' @param lower A numeric vector specifying lower bounds for parameters. Defaults to `-Inf` for all parameters.
-#' @param upper A numeric vector specifying upper bounds for parameters. Defaults to `Inf` for all parameters.
-#' @param fixed_params A list or `data.frame` for fixing specific parameters:
+#'   Defaults to \code{NULL}.
+#' @param lower A numeric vector specifying lower bounds for parameters. Defaults to \code{-Inf} for all parameters.
+#' @param upper A numeric vector specifying upper bounds for parameters. Defaults to \code{Inf} for all parameters.
+#' @param fixed_params A list or \code{data.frame} for fixing specific parameters:
 #'   \describe{
-#'     \item{List}{Named list where parameter values can be numeric or expressions (e.g., `list(k = "max(y)", t1 = 40)`).}
-#'     \item{Data frame}{Requires a `uid` column for group IDs and fixed parameter values.}
+#'     \item{List}{Named list where parameter values can be numeric or expressions (e.g., \code{list(k = "max(y)", t1 = 40)}).}
+#'     \item{Data frame}{Requires a \code{uid} column for group IDs and fixed parameter values.}
 #'   }
-#'   Defaults to `NULL`.
+#'   Defaults to \code{NULL}.
 #' @param method A character vector specifying optimization methods.
 #'   Check available methods using \code{list_methods()} and their dependencies using
 #'   \code{optimx::checkallsolvers()}. Defaults to \code{c("subplex", "pracmanm", "anms")}.
-#' @param subset A vector (optional) containing levels of `grp` to filter the data for analysis.
-#'   Defaults to `NULL` (all groups are included).
-#' @param options A list of additional options. See `modeler.options()`
+#' @param subset A vector (optional) containing levels of \code{grp} to filter the data for analysis.
+#'   Defaults to \code{NULL} (all groups are included).
+#' @param options A list of additional options. See \code{modeler.options()}
 #' \describe{
 #'   \item{\code{progress}}{Logical. If \code{TRUE} a progress bar is displayed. Default is \code{FALSE}. Try this before running the function: \code{progressr::handlers("progress", "beepr")}.}
 #'   \item{\code{parallel}}{Logical. If \code{TRUE} the model fit is performed in parallel. Default is \code{FALSE}.}
-#'   \item{\code{workers}}{The number of parallel processes to use. `parallel::detectCores()`}
+#'   \item{\code{workers}}{The number of parallel processes to use. \code{parallel::detectCores()}}
 #'   \item{\code{trace}}{If \code{TRUE} , convergence monitoring of the current fit is reported in the console. \code{FALSE} by default.}
 #'   \item{\code{return_method}}{ Logical. If \code{TRUE}, includes the optimization method used in the result. Default is \code{FALSE}.}
 #' }
@@ -43,11 +43,10 @@
 #' \describe{
 #'   \item{\code{param}}{Data frame containing optimized parameters and related information.}
 #'   \item{\code{dt}}{Data frame with input data, fitted values, and residuals.}
-#'   \item{\code{fn}}{The function call used for fitting models.}
 #'   \item{\code{metrics}}{Metrics and summary of the models.}
 #'   \item{\code{execution}}{Total execution time for the analysis.}
 #'   \item{\code{response}}{Name of the response variable analyzed.}
-#'   \item{\code{keep}}{Metadata retained based on the `keep` argument.}
+#'   \item{\code{keep}}{Metadata retained based on the \code{keep} argument.}
 #'   \item{\code{fun}}{Name of the curve-fitting function used.}
 #'   \item{\code{parallel}}{List containing parallel execution details (if applicable).}
 #'   \item{\code{fit}}{List of fitted models for each group.}
@@ -315,15 +314,25 @@ modeler <- function(data,
   }
   p <- progressr::progressor(along = grp_id)
   init_time <- Sys.time()
+
+  ## Workaround: subplex::subplex() fails to locate the function by name
+  ## given by it's argument 'fn', if then function is also called "fn".
+  ## The problem can be avoided by giving it a different name.
+  ## (This will happen with upcoming versions of the 'future' package)
+  fn_name <- fn
+
   objt <- foreach(
     i = grp_id,
-    .options.future = list(seed = TRUE)
+    .options.future = list(
+      seed = TRUE,
+      globals = structure(TRUE, add = fn_name)
+    )
   ) %dofu% {
     p(sprintf("uid = %s", i))
     .fitter_curve(
       data = dt_nest,
       id = i,
-      fn = fn,
+      fn = fn_name,
       method = method,
       lower = lower,
       upper = upper,
@@ -359,7 +368,13 @@ modeler <- function(data,
   dt <- suppressWarnings({
     dt |>
       full_join(y = fitted_vals, by = c("x", "uid")) |>
-      mutate(.residual = y - .fitted)
+      full_join(y = .sigma_grp.modeler(objt), by = "uid") |>
+      mutate(
+        .resid = y - .fitted,
+        .std_resid = .resid / .sigma
+      ) |>
+      mutate(fn_name = fn_name) |>
+      select(-.sigma)
   })
   # Output
   if (!return_method) {
@@ -368,7 +383,6 @@ modeler <- function(data,
   out <- list(
     param = param_mat,
     dt = dt,
-    fn = density,
     metrics = metrics,
     execution = end_time - init_time,
     response = variable,
@@ -407,6 +421,7 @@ modeler <- function(data,
 #'   \item{\code{p}}{Number of parameters estimated.}
 #'   \item{\code{n_obs}}{Number of observations.}
 #'   \item{\code{uid}}{Unique identifier.}
+#'   \item{\code{fn_name}}{Name of the curve-fitting function used.}
 #' }
 #' @export
 #' @keywords internal
@@ -469,7 +484,8 @@ modeler <- function(data,
   best <- rr$method[which.min(rr$sse)]
   param <- rr |>
     dplyr::filter(method == best) |>
-    dplyr::select(-c(fevals:xtime))
+    dplyr::select(-c(fevals:xtime)) |>
+    dplyr::mutate(fn_name = fn)
   # attributes
   details <- attr(kkopt, "details")[best, ]
   hessian <- details$nhatend
@@ -496,11 +512,76 @@ modeler <- function(data,
     hessian = hessian,
     type = coef,
     conv = rr[rr$method == best, "convergence"],
+    x = t,
+    y = y,
     p = length(est_params),
     n_obs = length(t),
-    uid = id
+    uid = id,
+    fn_name = fn
   )
   return(out)
+}
+
+#' Extract fitted values from a \code{modeler} object
+#'
+#' @aliases fitted.modeler
+#' @param object An object of class `modeler`
+#' @param ... Additional parameters for future functionality.
+#' @author Johan Aparicio [aut]
+#' @method fitted modeler
+#' @return A numeric vector of fitted values.
+#' @export
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_linear_sat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' fitted(mod_1)
+#' @export
+fitted.modeler <- function(object, ...) {
+  if (!inherits(object, "modeler")) {
+    stop("The object must be of class 'modeler'.")
+  }
+  fitted_vals <- object$dt$.fitted
+  return(fitted_vals)
+}
+
+#' Extract residuals from a \code{modeler} object
+#'
+#' @aliases residuals.modeler
+#' @param object An object of class `modeler`
+#' @param ... Additional parameters for future functionality.
+#' @author Johan Aparicio [aut]
+#' @method residuals modeler
+#' @return A numeric vector of residuals
+#' @export
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_linear_sat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' residuals(mod_1)
+#' @export
+residuals.modeler <- function(object, ...) {
+  if (!inherits(object, "modeler")) {
+    stop("The object must be of class 'modeler'.")
+  }
+  resid_vals <- object$dt$.resid
+  return(resid_vals)
 }
 
 #' @noRd

@@ -97,7 +97,7 @@ plot_fn <- function(fn = "fn_linear_sat",
 
 #' Plot an object of class \code{modeler}
 #'
-#' @description Create several plots for an object of class \code{modeler}
+#' @description Creates several plots for an object of class \code{modeler}.
 #' @aliases plot.modeler
 #' @param x An object of class \code{modeler}, typically the result of calling \code{modeler()}.
 #' @param id An optional group ID to filter the data for plotting, useful for avoiding overcrowded plots.
@@ -118,10 +118,12 @@ plot_fn <- function(fn = "fn_linear_sat",
 #' @param n_points Numeric value specifying the number of points for interpolation along the x-axis. Default is 2000.
 #' @param title Optional character string to add a title to the plot.
 #' @param add_ci Logical value indicating whether to add confidence intervals for \code{type = 4, 5, 6}. Default is \code{TRUE}.
-#' @param add_ribbon Logical value indicating whether to add a ribbon for confidence intervals in \code{type = 4, 5, 6}. Default is \code{FALSE}.
-#' @param color_ribbon Character string specifying the color of the ribbon. Default is "blue".
 #' @param color_ci Character string specifying the color of the confidence interval when \code{type = 4, 5, 6}. Default is "blue".
 #' @param color_pi Character string specifying the color of the prediction interval when \code{type = 4}. Default is "red".
+#' @param add_ribbon_ci Logical value indicating whether to add a ribbon for confidence intervals in \code{type = 4, 5, 6}. Default is \code{FALSE}.
+#' @param add_ribbon_pi Logical value indicating whether to add a ribbon for prediction intervals in \code{type = 4}. Default is \code{FALSE}.
+#' @param color_ribbon_ci Character string specifying the color of the ribbon (ci). Default is "blue".
+#' @param color_ribbon_pi Character string specifying the color of the ribbon (pi). Default is "red".
 #' @param ... Additional graphical parameters for future extensions.
 #' @author Johan Aparicio [aut]
 #' @method plot modeler
@@ -155,17 +157,16 @@ plot.modeler <- function(x,
                          color = "red",
                          color_points = "black",
                          parm = NULL,
-                         n_points = 2000,
+                         n_points = 1000,
                          title = NULL,
                          add_ci = TRUE,
-                         add_ribbon = FALSE,
-                         color_ribbon = "blue",
                          color_ci = "blue",
-                         color_pi = "red", ...) {
-  data <- x$dt |> select(uid, var, x, y, .fitted)
-  param <- x$param
-  fn <- x$fn
-  dt <- full_join(data, y = param, by = c("uid"))
+                         color_pi = "red",
+                         add_ribbon_ci = FALSE,
+                         add_ribbon_pi = FALSE,
+                         color_ribbon_ci = "blue",
+                         color_ribbon_pi = "red", ...) {
+  dt <- x$dt |> select(uid, var, x, y, .fitted)
   if (is.null(id)) {
     id <- dt$uid[1]
   } else {
@@ -173,37 +174,73 @@ plot.modeler <- function(x,
       stop("ids not found in x.")
     }
   }
-  dt <- dt |>
-    filter(uid %in% id) |>
-    droplevels()
-  param <- param |>
-    filter(uid %in% id) |>
-    droplevels()
-
   max_x <- max(dt$x, na.rm = TRUE)
   min_x <- min(dt$x, na.rm = TRUE)
   sq <- seq(min_x, max_x, length.out = n_points)
-
-  func_dt <- full_join(
-    x = expand.grid(x = sq, uid = unique(dt$uid)),
-    y = param,
-    by = "uid"
+  # List of models
+  expand_by_grp <- function(fit, seq) {
+    curve <- fit$fn_name
+    .fn <- create_call(curve)
+    .uid <- fit$uid
+    .param <- pull(fit$type, value, parameter)
+    .func_dt <- data.frame(uid = .uid, x = seq, t(.param)) |>
+      group_by(x, uid) |>
+      mutate(dens = !!.fn, fn_name = curve) |>
+      ungroup() |>
+      dplyr::select(uid, x, dens, fn_name)
+    return(.func_dt)
+  }
+  fit_list <- x$fit
+  pos <- which(unlist(lapply(fit_list, function(x) x$uid)) %in% id)
+  fit_list <- fit_list[pos]
+  # Density
+  func_dt <- do.call(
+    what = rbind,
+    args = lapply(X = fit_list, FUN = expand_by_grp, seq = sq)
   ) |>
-    group_by(x, uid) |>
-    mutate(dens = !!fn) |>
-    ungroup()
-
+    as_tibble()
+  dt <- droplevels(filter(dt, uid %in% id))
   label <- unique(dt$var)
+  functions <- unique(func_dt$fn_name)
 
   if (type == 1) {
     p0 <- dt |>
       ggplot() +
       geom_point(aes(x = x, y = y), color = color_points) +
-      geom_line(data = func_dt, aes(x = x, y = dens), color = color) +
+      {
+        if (length(functions) == 1) {
+          geom_line(
+            data = func_dt,
+            mapping = aes(x = x, y = dens, group = fn_name, linetype = fn_name),
+            color = color
+          )
+        }
+      } +
+      {
+        if (length(functions) > 1) {
+          geom_line(
+            data = func_dt,
+            mapping = aes(
+              x = x,
+              y = dens,
+              group = fn_name,
+              linetype = fn_name,
+              color = fn_name
+            )
+          )
+        }
+      } +
       theme_classic(base_size = base_size) +
       labs(y = label, title = title)
     if (length(id) > 1) {
       p0 <- p0 + facet_wrap(~uid)
+    }
+    if (length(functions) == 1) {
+      p0 <- p0 + theme(legend.position = "none")
+    } else if (length(functions) > 1) {
+      p0 <- p0 +
+        scale_color_brewer(type = "qual", palette = "Dark2") +
+        labs(color = "Model", linetype = "Model")
     }
   }
   if (type == 2) {
@@ -216,17 +253,31 @@ plot.modeler <- function(x,
       labs(x = "Group", title = title) +
       theme_classic(base_size = base_size) +
       theme(axis.text.x = element_text(size = label_size))
+    if (length(functions) > 1) {
+      p0 <- p0 + facet_wrap(fn_name ~ coefficient, scales = "free_y")
+    }
   }
   if (type == 3) {
     p0 <- dt |>
       ggplot() +
       geom_line(
         data = func_dt,
-        mapping = aes(x = x, y = dens, group = uid, color = as.factor(uid)),
+        mapping = aes(
+          x = x,
+          y = dens,
+          group = paste0(uid, "_", fn_name),
+          color = as.factor(uid)
+        ),
       ) +
       theme_classic(base_size = base_size) +
       labs(y = label, color = "uid", title = title) +
       scale_color_viridis_d(option = "D", direction = 1)
+    if (length(functions) > 1) {
+      p0 <- p0 + facet_wrap(~fn_name)
+    }
+    if (length(functions) == 1) {
+      p0 <- p0 + theme(legend.position = "none")
+    }
   }
   if (type %in% c(4, 5, 6)) {
     tp <- switch(
@@ -247,11 +298,18 @@ plot.modeler <- function(x,
         n <- x$n_obs
         p <- x$p
         df <- n - p
-        data.frame(uid = x$uid, n = n, p = p, df = df, mse = x$param$sse / df)
+        data.frame(
+          uid = x$uid,
+          n = n,
+          p = p,
+          df = df,
+          mse = x$param$sse / df,
+          fn_name = x$fn_name
+        )
       })
     )
     dt_ci <- predict.modeler(object = x, x = sq, type = tp, id = id) |>
-      left_join(y = mse_dt, by = "uid") |>
+      left_join(y = mse_dt, by = c("uid", "fn_name")) |>
       mutate(std.error.p = sqrt(mse + std.error^2)) |>
       mutate(
         ci_lower = predicted.value + qt((1 - 0.95) / 2, df) * std.error,
@@ -261,23 +319,50 @@ plot.modeler <- function(x,
       )
     p0 <- dt_ci |>
       ggplot() +
-      geom_line(
-        mapping = aes(x = x_new, y = predicted.value, group = uid),
-        color = color
-      ) +
       {
-        if (add_ribbon && add_ci) {
+        if (add_ribbon_ci) {
           geom_ribbon(
-            mapping = aes(x = x_new, ymin = ci_lower, ymax = ci_upper),
-            fill = color_ribbon,
-            alpha = 0.2
+            mapping = aes(
+              x = x_new,
+              ymin = ci_lower,
+              ymax = ci_upper,
+              group = fn_name
+            ),
+            fill = color_ribbon_ci,
+            alpha = 0.1
           )
         }
       } +
       {
+        if (add_ribbon_pi && type == 4) {
+          geom_ribbon(
+            mapping = aes(
+              x = x_new,
+              ymin = pi_lower,
+              ymax = pi_upper,
+              group = fn_name
+            ),
+            fill = color_ribbon_pi,
+            alpha = 0.1
+          )
+        }
+      } +
+      geom_line(
+        mapping = aes(
+          x = x_new,
+          y = predicted.value,
+          group = paste0(uid, "_", fn_name)
+        ),
+        color = "black"
+      ) +
+      {
         if (add_ci) {
           geom_line(
-            mapping = aes(x = x_new, y = ci_lower, group = uid),
+            mapping = aes(
+              x = x_new,
+              y = ci_lower,
+              group = paste0(uid, "_", fn_name)
+            ),
             linetype = 2,
             color = color_ci
           )
@@ -286,7 +371,11 @@ plot.modeler <- function(x,
       {
         if (add_ci) {
           geom_line(
-            mapping = aes(x = x_new, y = ci_upper, group = uid),
+            mapping = aes(
+              x = x_new,
+              y = ci_upper,
+              group = paste0(uid, "_", fn_name)
+            ),
             linetype = 2,
             color = color_ci
           )
@@ -295,8 +384,12 @@ plot.modeler <- function(x,
       {
         if (add_ci && type == 4) {
           geom_line(
-            mapping = aes(x = x_new, y = pi_lower, group = uid),
-            linetype = 4,
+            mapping = aes(
+              x = x_new,
+              y = pi_lower,
+              group = paste0(uid, "_", fn_name)
+            ),
+            linetype = 2,
             color = color_pi
           )
         }
@@ -304,8 +397,12 @@ plot.modeler <- function(x,
       {
         if (add_ci && type == 4) {
           geom_line(
-            mapping = aes(x = x_new, y = pi_upper, group = uid),
-            linetype = 4,
+            mapping = aes(
+              x = x_new,
+              y = pi_upper,
+              group = paste0(uid, "_", fn_name)
+            ),
+            linetype = 2,
             color = color_pi
           )
         }
@@ -314,10 +411,21 @@ plot.modeler <- function(x,
       labs(
         y = label,
         x = "x",
+        color = "Model",
+        fill = "Model",
         title = ifelse(is.null(title), title_tmp, title)
       )
-    if (length(id) > 1) {
-      p0 <- p0 + facet_wrap(~uid)
+    if (length(functions) == 1 && length(id) == 1) {
+      p0 <- p0
+    }
+    if (length(functions) > 1 && length(id) == 1) {
+      p0 <- p0 + facet_grid(~fn_name)
+    }
+    if (length(functions) == 1 && length(id) > 1) {
+      p0 <- p0 + facet_grid(~uid)
+    }
+    if (length(functions) > 1 && length(id) > 1) {
+      p0 <- p0 + facet_grid(uid ~ fn_name)
     }
   }
   return(p0)

@@ -105,7 +105,6 @@ predict.modeler <- function(object,
           X = fit_list,
           FUN = .delta_method,
           x_new = x,
-          curve = object$fun,
           se_interval = se_interval
         )
       )
@@ -133,7 +132,6 @@ predict.modeler <- function(object,
           X = fit_list,
           FUN = .delta_method_auc,
           x_new = x,
-          curve = object$fun,
           n_points = n_points
         )
       )
@@ -157,7 +155,6 @@ predict.modeler <- function(object,
           X = fit_list,
           FUN = .delta_method_deriv,
           x_new = x,
-          curve = object$fun,
           which = type
         )
       )
@@ -183,17 +180,18 @@ predict.modeler <- function(object,
   if (metadata) {
     predictions |>
       left_join(
-        y = select(dt, uid, all_of(keep)),
+        y = unique.data.frame(select(dt, uid, all_of(keep))),
         by = "uid"
       ) |>
-      relocate(all_of(keep), .after = uid)
+      relocate(all_of(keep), .after = fn_name)
   } else {
     return(predictions)
   }
 }
 
 # Delta method point estimation
-.delta_method <- function(fit, x_new, curve, se_interval = "confidence") {
+.delta_method <- function(fit, x_new, se_interval = "confidence") {
+  curve <- fit$fn_name
   tt <- fit$hessian
   rdf <- (fit$n_obs - fit$p)
   varerr <- fit$param$sse / rdf
@@ -230,6 +228,7 @@ predict.modeler <- function(object,
   # Combine results
   results <- data.frame(
     uid = uid,
+    fn_name = curve,
     x_new = x_new,
     predicted.value = predicted_values,
     std.error = std_errors
@@ -256,6 +255,11 @@ ff <- function(params, x_new, curve, fixed_params = NA) {
       collapse = ", "
     )
     values <- paste(values, fix, sep = ", ")
+  } else {
+    values <- paste(
+      paste(names(params), params, sep = " = "),
+      collapse = ", "
+    )
   }
   string <- paste("sapply(x_new, FUN = ", curve, ", ", values, ")", sep = "")
   y_hat <- eval(parse(text = string))
@@ -263,7 +267,8 @@ ff <- function(params, x_new, curve, fixed_params = NA) {
 }
 
 # Delta method AUC estimation
-.delta_method_auc <- function(fit, x_new, curve, n_points = 1000) {
+.delta_method_auc <- function(fit, x_new, n_points = 1000) {
+  curve <- fit$fn_name
   tt <- fit$hessian
   rdf <- (fit$n_obs - fit$p)
   varerr <- fit$param$sse / rdf
@@ -299,6 +304,7 @@ ff <- function(params, x_new, curve, fixed_params = NA) {
   # Combine results
   results <- data.frame(
     uid = uid,
+    fn_name = curve,
     x_min = x_new[1],
     x_max = x_new[2],
     predicted.value = predicted_values,
@@ -336,7 +342,8 @@ ff_auc <- function(params, x_new, curve, fixed_params = NA, n_points = 1000) {
 }
 
 # Delta method for derivative estimation
-.delta_method_deriv <- function(fit, x_new, curve, which = "fd") {
+.delta_method_deriv <- function(fit, x_new, which = "fd") {
+  curve <- fit$fn_name
   tt <- fit$hessian
   rdf <- (fit$n_obs - fit$p)
   varerr <- fit$param$sse / rdf
@@ -372,6 +379,7 @@ ff_auc <- function(params, x_new, curve, fixed_params = NA, n_points = 1000) {
   # Combine results
   results <- data.frame(
     uid = uid,
+    fn_name = curve,
     x_new = x_new,
     predicted.value = predicted_values,
     std.error = std_errors
@@ -423,6 +431,7 @@ ff_deriv <- function(params, x_new, curve, fixed_params = NA, which = "fd") {
 
 # Delta method generic function
 .delta_method_gen <- function(fit, formula) {
+  curve <- fit$fn_name
   tt <- fit$hessian
   rdf <- (fit$n_obs - fit$p)
   varerr <- fit$param$sse / rdf
@@ -455,6 +464,7 @@ ff_deriv <- function(params, x_new, curve, fixed_params = NA, which = "fd") {
   # Combine results
   results <- data.frame(
     uid = uid,
+    fn_name = curve,
     formula = paste(formula)[2],
     predicted.value = predicted_values,
     std.error = std_errors

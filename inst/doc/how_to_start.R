@@ -132,5 +132,5 @@ coef(mod_3)
 plot(mod_3)
 
 ## -----------------------------------------------------------------------------
-rbind(metrics(mod_1), metrics(mod_2), metrics(mod_3))
+performance(mod_1, mod_2, mod_3)
 

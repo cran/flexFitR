@@ -82,6 +82,18 @@ utils::globalVariables(
     "pi_upper",
     "df",
     ".y",
-    ".grp"
+    ".grp",
+    "nobs",
+    "logLik",
+    "model",
+    "name",
+    "o_max",
+    "o_min",
+    "R2",
+    "AIC",
+    "p",
+    "fn_name",
+    ".resid",
+    ".sigma"
   )
 )

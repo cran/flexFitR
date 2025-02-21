@@ -16,7 +16,7 @@ data(dt_potato)
 head(dt_potato) |> kable()
 
 ## -----------------------------------------------------------------------------
-fn <- function(t, L, k, t0) L / (1 + exp(-k * (t - t0)))
+fn_logistic <- function(t, L, k, t0) L / (1 + exp(-k * (t - t0)))
 
 ## -----------------------------------------------------------------------------
 plots <- c(40, 166)
@@ -27,7 +27,7 @@ mod_1 <- dt_potato |>
     x = DAP,
     y = Canopy,
     grp = Plot,
-    fn = "fn",
+    fn = "fn_logistic",
     parameters = c(L = 100, k = 4, t0 = 40),
     subset = plots
   )

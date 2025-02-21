@@ -17,12 +17,20 @@
 #' logLik(mo_1)
 logLik.modeler <- function(object, ...) {
   ids <- unlist(x = lapply(object$fit, FUN = \(x) x$uid))
-  sse <- object$param$sse
+  sse <- unlist(x = lapply(X = object$fit, FUN = \(x) x$param$sse))
   N <- unlist(x = lapply(object$fit, FUN = \(x) x$n_obs))
   P <- unlist(x = lapply(X = object$fit, FUN = \(x) x$p))
+  fn_name <- unlist(x = lapply(X = object$fit, FUN = \(x) x$fn_name))
   logL <- 0.5 * (-N * (log(2 * pi) + 1 - log(N) + log(sse)))
   df <- 1L + P
-  out <- data.frame(uid = ids, logLik = logL, df = df, nobs = N, p = P)
+  out <- data.frame(
+    uid = ids,
+    fn_name = fn_name,
+    logLik = logL,
+    df = df,
+    nobs = N,
+    p = P
+  )
   return(out)
 }
 
@@ -152,4 +160,14 @@ anova.modeler <- function(object, full_model = NULL, ...) {
   ) |>
     as_tibble()
   return(results)
+}
+
+#' @noRd
+.sigma_grp.modeler <- function(object, ...) {
+  ids <- unlist(x = lapply(object, FUN = \(x) x$uid))
+  sse <- unlist(x = lapply(X = object, FUN = \(x) x$param$sse))
+  N <- unlist(x = lapply(object, FUN = \(x) x$n_obs))
+  P <- unlist(x = lapply(X = object, FUN = \(x) x$p))
+  out <- data.frame(uid = ids, .sigma = sqrt(sse / (N - P)))
+  return(out)
 }

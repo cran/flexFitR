@@ -115,13 +115,13 @@ rbind.data.frame(
   kable()
 
 ## -----------------------------------------------------------------------------
-rbind.data.frame(
-  mutate(AIC(mod_1), model = "1", .before = uid),
-  mutate(AIC(mod_2), model = "2", .before = uid),
-  mutate(AIC(mod_3), model = "3", .before = uid)
-) |>
+comparison <- performance(mod_1, mod_2, mod_3)
+comparison |>
   filter(uid %in% 166) |>
   kable()
+
+## ----fig.alt="plot fit 4"-----------------------------------------------------
+plot(comparison, id = 166)
 
 ## -----------------------------------------------------------------------------
 # Point Prediction
