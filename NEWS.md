@@ -1,3 +1,30 @@
+# flexFitR 1.2.0
+
+# flexFitR 1.1.0.00009
+
+## New features
+
+* `compute_tangent()` function added to compute tangent line(s) for a `modeler` object.
+* `inverse_predict.modeler()` S3 method added to calculate inverse predictions for
+`modeler` objects.
+* `update.modeler()` S3 method added to refit a model of class `modeler`.
+* Adding `fn_lin_logis()`, `fn_quad_plat()` and `fn_quad_pl_sm()`.
+* `predict.modeler()` includes `parallel` and `workers` to allow for parallel computing.
+
+## Changes
+
+* When evaluating several methods in `modeler()`, Jacobian and Hessian are
+computed only for the best method.
+* Now functions are required to be vectorized (faster execution).
+* Renaming `fn_lin_plat()` function.
+* The `modeler()` function now uses `optimr` instead of `opm` for faster execution.
+* `plot.modeler()` includes `linewidth` argument to increase size in geom lines.
+
+## Bug fixes
+
+* Removed methods that required hessian matrix (snewton, snewtonm, snewtm) in `list_methods()`.
+* Fixed issue when combining fitted values in `modeler()`.
+
 # flexFitR 1.1.0
 
 ## New features

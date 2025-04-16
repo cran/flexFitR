@@ -28,7 +28,7 @@ kable(mutate_if(explorer$summ_vars, is.numeric, round, 2))
 
 ## ----echo = FALSE, fig.width= 8, fig.alt="plot fn"----------------------------
 plot_fn(
-  fn = "fn_linear_sat",
+  fn = "fn_lin_plat",
   params = c(t1 = 40, t2 = 61.8, k = 100),
   interval = c(0, 108),
   color = "black",
@@ -41,7 +41,7 @@ mod_1 <- dt_potato |>
     x = DAP,
     y = Canopy,
     grp = Plot,
-    fn = "fn_linear_sat",
+    fn = "fn_lin_plat",
     parameters = c(t1 = 45, t2 = 80, k = 0.9),
     subset = c(166, 40)
   )
@@ -77,7 +77,7 @@ mod_2 <- dt_potato |>
     x = DAP,
     y = Canopy,
     grp = Plot,
-    fn = "fn_linear_sat",
+    fn = "fn_lin_plat",
     parameters = initials,
     subset = c(166, 40)
   )
@@ -95,7 +95,7 @@ mod_3 <- dt_potato |>
     x = DAP,
     y = Canopy,
     grp = Plot,
-    fn = "fn_linear_sat",
+    fn = "fn_lin_plat",
     parameters = c(t1 = 45, t2 = 80, k = 0.9),
     fixed_params = fixed_params,
     subset = c(166, 40)
@@ -137,7 +137,7 @@ predict(mod_1, formula = ~ t2 - t1, id = 166) |> kable()
 #     x = DAP,
 #     y = Canopy,
 #     grp = Plot,
-#     fn = "fn_linear_sat",
+#     fn = "fn_lin_plat",
 #     parameters = c(t1 = 45, t2 = 80, k = 0.9),
 #     fixed_params = list(k = "max(y)"),
 #     options = list(progress = TRUE, parallel = TRUE, workers = 5)

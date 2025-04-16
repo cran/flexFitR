@@ -13,6 +13,8 @@
   n_points = 1000,
   formula = NULL,
   metadata = FALSE,
+  parallel = FALSE,
+  workers = NULL,
   ...
 )
 }
@@ -46,6 +48,11 @@ the area under the curve (AUC) when \code{type = "auc"}. Default is \code{1000}.
 \item{metadata}{Logical. If \code{TRUE}, metadata is included with the
 predictions. Default is \code{FALSE}.}
 
+\item{parallel}{Logical. If \code{TRUE} the prediction is performed in parallel. Default is \code{FALSE}.
+Use only when a large number of groups are being analyzed and \code{x} is a grid of values.}
+
+\item{workers}{The number of parallel processes to use. \code{parallel::detectCores()}}
+
 \item{...}{Additional parameters for future functionality.}
 }
 \value{
@@ -66,7 +73,7 @@ mod_1 <- dt_potato |>
     x = DAP,
     y = Canopy,
     grp = Plot,
-    fn = "fn_linear_sat",
+    fn = "fn_lin_plat",
     parameters = c(t1 = 45, t2 = 80, k = 0.9),
     subset = c(15, 2, 45)
   )

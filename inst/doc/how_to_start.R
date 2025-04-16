@@ -58,14 +58,15 @@ predict(mo, newdata = data.frame(X = 4.5), se.fit = TRUE)
 
 ## ----warning=FALSE, message=FALSE---------------------------------------------
 fun <- function(t, t1 = 45, t2 = 80, k = 0.9) {
-  if (t < t1) {
-    y <- 0
-  } else if (t >= t1 && t <= t2) {
-    y <- k / (t2 - t1) * (t - t1)
-  } else {
-    y <- k
-  }
-  return(y)
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t >= t1 & t <= t2,
+      yes = k / (t2 - t1) * (t - t1),
+      no = k
+    )
+  )
 }
 
 ## ----fig.alt = "Plot x,y"-----------------------------------------------------
@@ -84,7 +85,7 @@ mod_1 <- dt |>
     x = time,
     y = variable,
     fn = "fun",
-    parameters = c(t1 = 45, t2 = 80, k = 90)
+    parameters = c(t1 = 40, t2 = 70, k = 100)
   )
 mod_1
 
@@ -102,6 +103,18 @@ vcov(mod_1)
 ## -----------------------------------------------------------------------------
 # Making predictions
 predict(mod_1, x = 45)
+
+## -----------------------------------------------------------------------------
+mod_nls <- dt |>
+  nls(
+    formula = variable ~ fun(time, t1, t2, k),
+    start = c(t1 = 40, t2 = 70, k = 100),
+    algorithm = "default"
+  )
+summary(mod_nls)
+coef(mod_nls)
+vcov(mod_nls)
+predict(mod_nls, newdata = data.frame(time = 45))
 
 ## ----warning=FALSE, message=FALSE---------------------------------------------
 init <- data.frame(uid = 1, t1 = 20, t2 = 30, k = 0.8)
@@ -124,7 +137,7 @@ mod_3 <- dt |>
     x = time,
     y = variable,
     fn = "fun",
-    parameters = c(t1 = 45, t2 = 80, k = 90),
+    parameters = c(t1 = 40, t2 = 70, k = 100),
     fixed_params = fix
   )
 mod_3

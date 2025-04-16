@@ -529,7 +529,7 @@ understand the temporal evolution of each plot.</p>
 In this case, it is a piece-wise regression function with three
 parameters: t1, t2, and k. The function can be expressed mathematically
 as follows:</p>
-<p><code>fn_linear_sat()</code></p>
+<p><code>fn_lin_plat()</code></p>
 <p><span class="math display">\[\begin{equation}
 f(t; t_1, t_2, k) =
 \begin{cases}
@@ -539,7 +539,7 @@ t_2 \\
 k &amp; \text{if } t &gt; t_2
 \end{cases}
 \end{equation}\]</span></p>
-<p><img role="img" aria-label="plot fn" src="data:image/png;base64,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" alt="plot fn" /></p>
+<p><img role="img" aria-label="plot fn" src="data:image/png;base64,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" alt="plot fn" /></p>
 </div>
 <div id="fitting-models" class="section level2">
 <h2>3. Fitting Models</h2>
@@ -552,25 +552,24 @@ plots.</li>
 </ul>
 <p>In this example, we have 196 plots but will only fit the model for
 plots 166 and 40 as a subset. We define the piecewise function
-<code>fn_linear_sat</code> and set initial values for the
-parameters.</p>
+<code>fn_lin_plat</code> and set initial values for the parameters.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>mod_1 <span class="ot">&lt;-</span> dt_potato <span class="sc">|&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">modeler</span>(</span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="at">x =</span> DAP,</span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="at">y =</span> Canopy,</span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="at">grp =</span> Plot,</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_linear_sat&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_lin_plat&quot;</span>,</span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>    <span class="at">parameters =</span> <span class="fu">c</span>(<span class="at">t1 =</span> <span class="dv">45</span>, <span class="at">t2 =</span> <span class="dv">80</span>, <span class="at">k =</span> <span class="fl">0.9</span>),</span>
 <span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>    <span class="at">subset =</span> <span class="fu">c</span>(<span class="dv">166</span>, <span class="dv">40</span>)</span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  )</span>
 <span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>mod_1</span>
 <span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; Canopy ~ fn_linear_sat(DAP, t1, t2, k) </span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; Canopy ~ fn_lin_plat(DAP, t1, t2, k) </span></span>
 <span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; Residuals (`Standardized`):</span></span>
 <span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;       Min.    1st Qu.     Median       Mean    3rd Qu.       Max. </span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; -1.7789201 -0.0004078  0.0000000  0.0000000  0.0008157  1.7789195 </span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; -1.7789202 -0.0004079  0.0000000  0.0000000  0.0008157  1.7789194 </span></span>
 <span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; Optimization Results `head()`:</span></span>
 <span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt;  uid   t1   t2   k     sse</span></span>
@@ -579,7 +578,7 @@ parameters.</p>
 <span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
 <span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt;       2 0.9432 secs        100% 558.5 (id)</span></span></code></pre></div>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt;       2 0.2171 secs        100% 551.5 (id)</span></span></code></pre></div>
 <p>After fitting, we can inspect the model summary and visualize the fit
 using the plot function:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">plot</span>(mod_1, <span class="at">id =</span> <span class="fu">c</span>(<span class="dv">166</span>, <span class="dv">40</span>))</span></code></pre></div>
@@ -603,7 +602,7 @@ using the plot function:</p>
 <td align="right">60.59505</td>
 <td align="right">100.0000</td>
 <td align="right">0.0544833</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 <tr class="even">
 <td align="right">166</td>
@@ -611,7 +610,7 @@ using the plot function:</p>
 <td align="right">57.54603</td>
 <td align="right">100.0047</td>
 <td align="right">40.9134555</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 </tbody>
 </table>
@@ -636,40 +635,40 @@ their variability.</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">coef</span>(mod_1)</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 7</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt;     uid fn_name       coefficient solution std.error `t value` `Pr(&gt;|t|)`</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 1    40 fn_linear_sat t1              34.8    0.0240    1453.    2.93e-15</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; 2    40 fn_linear_sat t2              60.6    0.0368    1648.    1.56e-15</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; 3    40 fn_linear_sat k              100.     0.0603    1659.    1.51e-15</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 4   166 fn_linear_sat t1              31.6    0.794       39.8   1.89e- 7</span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; 5   166 fn_linear_sat t2              57.5    0.902       63.8   1.79e- 8</span></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; 6   166 fn_linear_sat k              100.     1.65        60.6   2.32e- 8</span></span></code></pre></div>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt;     uid fn_name     coefficient solution std.error `t value` `Pr(&gt;|t|)`</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 1    40 fn_lin_plat t1              34.8    0.0240    1453.    2.93e-15</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; 2    40 fn_lin_plat t2              60.6    0.0368    1648.    1.56e-15</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; 3    40 fn_lin_plat k              100.     0.0603    1659.    1.51e-15</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 4   166 fn_lin_plat t1              31.6    0.794       39.8   1.89e- 7</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; 5   166 fn_lin_plat t2              57.5    0.902       63.8   1.79e- 8</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; 6   166 fn_lin_plat k              100.     1.65        60.6   2.32e- 8</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">confint</span>(mod_1)</span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 7</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;     uid fn_name       coefficient solution std.error ci_lower ci_upper</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;</span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; 1    40 fn_linear_sat t1              34.8    0.0240     34.8     34.9</span></span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 2    40 fn_linear_sat t2              60.6    0.0368     60.5     60.7</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 3    40 fn_linear_sat k              100.     0.0603     99.8    100. </span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 4   166 fn_linear_sat t1              31.6    0.794      29.6     33.7</span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 5   166 fn_linear_sat t2              57.5    0.902      55.2     59.9</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; 6   166 fn_linear_sat k              100.     1.65       95.8    104.</span></span></code></pre></div>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;     uid fn_name     coefficient solution std.error ci_lower ci_upper</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; 1    40 fn_lin_plat t1              34.8    0.0240     34.8     34.9</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 2    40 fn_lin_plat t2              60.6    0.0368     60.5     60.7</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 3    40 fn_lin_plat k              100.     0.0603     99.8    100. </span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 4   166 fn_lin_plat t1              31.6    0.794      29.6     33.7</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 5   166 fn_lin_plat t2              57.5    0.902      55.2     59.9</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; 6   166 fn_lin_plat k              100.     1.65       95.8    104.</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">vcov</span>(mod_1)</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; $`40`</span></span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt;               t1            t2            k</span></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; t1  5.755016e-04 -0.0002977975 4.429736e-08</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; t1  5.755016e-04 -0.0002977975 4.429740e-08</span></span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; t2 -2.977975e-04  0.0013525945 9.350853e-04</span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; k   4.429736e-08  0.0009350853 3.632249e-03</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; k   4.429740e-08  0.0009350853 3.632249e-03</span></span>
 <span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; attr(,&quot;fn_name&quot;)</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;fn_linear_sat&quot;</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;fn_lin_plat&quot;</span></span>
 <span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; $`166`</span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;             t1         t2           k</span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; t1  0.63072149 -0.2613850 -0.00283193</span></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; t2 -0.26138501  0.8131631  0.71197685</span></span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; k  -0.00283193  0.7119768  2.72567110</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;              t1         t2            k</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; t1  0.630721491 -0.2613850 -0.002831928</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; t2 -0.261385006  0.8131631  0.711976842</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; k  -0.002831928  0.7119768  2.725671099</span></span>
 <span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; attr(,&quot;fn_name&quot;)</span></span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;fn_linear_sat&quot;</span></span></code></pre></div>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;fn_lin_plat&quot;</span></span></code></pre></div>
 </div>
 <div id="providing-different-initial-values" class="section level2">
 <h2>4. Providing different initial values</h2>
@@ -712,7 +711,7 @@ to improve the model.</p>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>    <span class="at">x =</span> DAP,</span>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>    <span class="at">y =</span> Canopy,</span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>    <span class="at">grp =</span> Plot,</span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_linear_sat&quot;</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_lin_plat&quot;</span>,</span>
 <span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>    <span class="at">parameters =</span> initials,</span>
 <span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>    <span class="at">subset =</span> <span class="fu">c</span>(<span class="dv">166</span>, <span class="dv">40</span>)</span>
 <span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  )</span></code></pre></div>
@@ -737,7 +736,7 @@ to improve the model.</p>
 <td align="right">60.59505</td>
 <td align="right">100.0000</td>
 <td align="right">5.448330e-02</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 <tr class="even">
 <td align="right">166</td>
@@ -745,7 +744,7 @@ to improve the model.</p>
 <td align="right">39.85048</td>
 <td align="right">100.0047</td>
 <td align="right">1.077531e+04</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 </tbody>
 </table>
@@ -768,7 +767,7 @@ follows:</p>
 <span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>    <span class="at">x =</span> DAP,</span>
 <span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>    <span class="at">y =</span> Canopy,</span>
 <span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>    <span class="at">grp =</span> Plot,</span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_linear_sat&quot;</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_lin_plat&quot;</span>,</span>
 <span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>    <span class="at">parameters =</span> <span class="fu">c</span>(<span class="at">t1 =</span> <span class="dv">45</span>, <span class="at">t2 =</span> <span class="dv">80</span>, <span class="at">k =</span> <span class="fl">0.9</span>),</span>
 <span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>    <span class="at">fixed_params =</span> fixed_params,</span>
 <span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>    <span class="at">subset =</span> <span class="fu">c</span>(<span class="dv">166</span>, <span class="dv">40</span>)</span>
@@ -794,7 +793,7 @@ follows:</p>
 <td align="right">60.59505</td>
 <td align="right">0.0544833</td>
 <td align="right">100.000</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 <tr class="even">
 <td align="right">166</td>
@@ -802,7 +801,7 @@ follows:</p>
 <td align="right">57.54663</td>
 <td align="right">40.9134718</td>
 <td align="right">100.007</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 </tbody>
 </table>
@@ -840,7 +839,7 @@ accuracy of their estimates by reducing the complexity of the model.</p>
 <td align="right">57.54603</td>
 <td align="right">100.0047</td>
 <td align="right">40.91346</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 <tr class="even">
 <td align="left">2</td>
@@ -849,7 +848,7 @@ accuracy of their estimates by reducing the complexity of the model.</p>
 <td align="right">39.85048</td>
 <td align="right">100.0047</td>
 <td align="right">10775.31306</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 <tr class="odd">
 <td align="left">3</td>
@@ -858,7 +857,7 @@ accuracy of their estimates by reducing the complexity of the model.</p>
 <td align="right">57.54663</td>
 <td align="right">100.0070</td>
 <td align="right">40.91347</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 </tr>
 </tbody>
 </table>
@@ -870,9 +869,9 @@ impact of these changes.</p>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>comparison <span class="sc">|&gt;</span></span>
 <span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="fu">filter</span>(uid <span class="sc">%in%</span> <span class="dv">166</span>) <span class="sc">|&gt;</span></span>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code></pre></div>
-<table>
+<table style="width:100%;">
 <colgroup>
-<col width="16%" />
+<col width="14%" />
 <col width="4%" />
 <col width="3%" />
 <col width="5%" />
@@ -909,7 +908,7 @@ impact of these changes.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">fn_linear_sat_1</td>
+<td align="left">fn_lin_plat_1</td>
 <td align="right">166</td>
 <td align="right">4</td>
 <td align="right">8</td>
@@ -926,7 +925,7 @@ impact of these changes.</p>
 <td align="right">1.0</td>
 </tr>
 <tr class="even">
-<td align="left">fn_linear_sat_2</td>
+<td align="left">fn_lin_plat_2</td>
 <td align="right">166</td>
 <td align="right">4</td>
 <td align="right">8</td>
@@ -943,7 +942,7 @@ impact of these changes.</p>
 <td align="right">0.3</td>
 </tr>
 <tr class="odd">
-<td align="left">fn_linear_sat_3</td>
+<td align="left">fn_lin_plat_3</td>
 <td align="right">166</td>
 <td align="right">3</td>
 <td align="right">8</td>
@@ -962,7 +961,7 @@ impact of these changes.</p>
 </tbody>
 </table>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">plot</span>(comparison, <span class="at">id =</span> <span class="dv">166</span>)</span></code></pre></div>
-<p><img role="img" aria-label="plot fit 4" src="data:image/png;base64,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" alt="plot fit 4" /></p>
+<p><img role="img" aria-label="plot fit 4" src="data:image/png;base64,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" alt="plot fit 4" /></p>
 </div>
 <div id="making-predictions" class="section level2">
 <h2>7. Making predictions</h2>
@@ -988,7 +987,7 @@ are some examples demonstrating these capabilities:</p>
 <tbody>
 <tr class="odd">
 <td align="right">166</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 <td align="right">45</td>
 <td align="right">51.62246</td>
 <td align="right">1.656734</td>
@@ -1011,7 +1010,7 @@ are some examples demonstrating these capabilities:</p>
 <tbody>
 <tr class="odd">
 <td align="right">166</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 <td align="right">0</td>
 <td align="right">108</td>
 <td align="right">6342.308</td>
@@ -1034,7 +1033,7 @@ are some examples demonstrating these capabilities:</p>
 <tbody>
 <tr class="odd">
 <td align="right">166</td>
-<td align="left">fn_linear_sat</td>
+<td align="left">fn_lin_plat</td>
 <td align="left">t2 - t1</td>
 <td align="right">25.93229</td>
 <td align="right">1.402375</td>
@@ -1058,7 +1057,7 @@ automatically detects the available cores.</p>
 <span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>    <span class="at">x =</span> DAP,</span>
 <span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>    <span class="at">y =</span> Canopy,</span>
 <span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>    <span class="at">grp =</span> Plot,</span>
-<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_linear_sat&quot;</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_lin_plat&quot;</span>,</span>
 <span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>    <span class="at">parameters =</span> <span class="fu">c</span>(<span class="at">t1 =</span> <span class="dv">45</span>, <span class="at">t2 =</span> <span class="dv">80</span>, <span class="at">k =</span> <span class="fl">0.9</span>),</span>
 <span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a>    <span class="at">fixed_params =</span> <span class="fu">list</span>(<span class="at">k =</span> <span class="st">&quot;max(y)&quot;</span>),</span>
 <span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">list</span>(<span class="at">progress =</span> <span class="cn">TRUE</span>, <span class="at">parallel =</span> <span class="cn">TRUE</span>, <span class="at">workers =</span> <span class="dv">5</span>)</span>

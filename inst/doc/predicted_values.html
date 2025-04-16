@@ -456,7 +456,7 @@ are calculated using the delta method.</p>
 potato dataset to fit logistic models of the form:</p>
 <p><span class="math display">\[f(t) = \frac{L}{1 + e^{-k(t -
 t_0)}}\]</span></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>fn_logistic <span class="ot">&lt;-</span> <span class="cf">function</span>(t, L, k, t0) L <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>k <span class="sc">*</span> (t <span class="sc">-</span> t0)))</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>fun_logistic <span class="ot">&lt;-</span> <span class="cf">function</span>(t, L, k, t0) L <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>k <span class="sc">*</span> (t <span class="sc">-</span> t0)))</span></code></pre></div>
 <p>For simplicity, we’ll focus on just two plots from the dataset (plot
 40 and plot 166) out of the total 196 plots available. After fitting the
 model, we’ll take a closer look at the parameter estimates, visualize
@@ -467,14 +467,14 @@ the fitted curves, and start making predictions.</p>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="at">x =</span> DAP,</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">y =</span> Canopy,</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">grp =</span> Plot,</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_logistic&quot;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fun_logistic&quot;</span>,</span>
 <span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="at">parameters =</span> <span class="fu">c</span>(<span class="at">L =</span> <span class="dv">100</span>, <span class="at">k =</span> <span class="dv">4</span>, <span class="at">t0 =</span> <span class="dv">40</span>),</span>
 <span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>    <span class="at">subset =</span> plots</span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  )</span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">print</span>(mod_1)</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; Canopy ~ fn_logistic(DAP, L, k, t0) </span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; Canopy ~ fun_logistic(DAP, L, k, t0) </span></span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; Residuals (`Standardized`):</span></span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
@@ -487,7 +487,7 @@ the fitted curves, and start making predictions.</p>
 <span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
 <span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;       2 0.9662 secs        100%   729 (id)</span></span></code></pre></div>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;       2 0.1829 secs        100%   712 (id)</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">plot</span>(mod_1, <span class="at">id =</span> plots)</span></code></pre></div>
 <p><img role="img" aria-label="plot fit" src="data:image/png;base64,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" alt="plot fit" /></p>
 </div>
@@ -513,14 +513,14 @@ include <code>type = &quot;point&quot;</code>.</p>
 <tbody>
 <tr class="odd">
 <td align="right">40</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="right">55</td>
 <td align="right">80.85282</td>
 <td align="right">2.912364</td>
 </tr>
 <tr class="even">
 <td align="right">166</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="right">55</td>
 <td align="right">95.06255</td>
 <td align="right">1.625402</td>
@@ -554,14 +554,14 @@ intervals, depending on the type of intervals you want to generate
 <tbody>
 <tr class="odd">
 <td align="right">40</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="right">55</td>
 <td align="right">80.85282</td>
 <td align="right">3.994805</td>
 </tr>
 <tr class="even">
 <td align="right">166</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="right">55</td>
 <td align="right">95.06255</td>
 <td align="right">2.697961</td>
@@ -596,7 +596,7 @@ e^{-k(t - t_0)}} \, dt \]</span></p>
 <tbody>
 <tr class="odd">
 <td align="right">40</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="right">0</td>
 <td align="right">108</td>
 <td align="right">6018.833</td>
@@ -604,7 +604,7 @@ e^{-k(t - t_0)}} \, dt \]</span></p>
 </tr>
 <tr class="even">
 <td align="right">166</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="right">0</td>
 <td align="right">108</td>
 <td align="right">6450.840</td>
@@ -634,14 +634,14 @@ required for this functionality.</p>
 <tbody>
 <tr class="odd">
 <td align="right">40</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="left">k/L * 100</td>
 <td align="right">0.1990757</td>
 <td align="right">0.0173468</td>
 </tr>
 <tr class="even">
 <td align="right">166</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="left">k/L * 100</td>
 <td align="right">0.2644616</td>
 <td align="right">0.0312821</td>
@@ -662,14 +662,14 @@ required for this functionality.</p>
 <tbody>
 <tr class="odd">
 <td align="right">40</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="left">(k * L)/4</td>
 <td align="right">4.959301</td>
 <td align="right">0.3761384</td>
 </tr>
 <tr class="even">
 <td align="right">166</td>
-<td align="left">fn_logistic</td>
+<td align="left">fun_logistic</td>
 <td align="left">(k * L)/4</td>
 <td align="right">6.480310</td>
 <td align="right">0.7140117</td>
@@ -826,7 +826,7 @@ the growth dynamics.</p>
 </tr>
 <tr class="even">
 <td align="right">166</td>
-<td align="right">0.6530568</td>
+<td align="right">0.6530569</td>
 <td align="right">37.8</td>
 <td align="right">-0.6530419</td>
 <td align="right">47.9</td>

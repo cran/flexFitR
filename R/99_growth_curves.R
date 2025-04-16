@@ -1,12 +1,13 @@
 #' Linear function
 #'
-#' Computes a value based on a linear function.
+#' A basic linear function of the form \code{f(t) = m * t + b}, where \code{m}
+#' is the slope and \code{b} is the intercept.
 #'
-#' @param t Numeric value.
-#' @param m Numeric value for the slope coefficient.
-#' @param b Numeric value for the intercept coefficient.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param m The slope of the line.
+#' @param b The intercept (function value when \code{t = 0}).
 #'
-#' @return A numeric value based on the linear function.
+#' @return A numeric vector of the same length as \code{t}, giving the linear function values.
 #' @export
 #'
 #' @details
@@ -25,20 +26,22 @@
 #'   n_points = 2000
 #' )
 fn_lin <- function(t, m, b) {
-  y <- m * t + b
-  return(y)
+  m * t + b
 }
 
 #' Quadratic function
 #'
-#' Computes a value based on a quadratic function..
+#' A standard quadratic function of the form \code{f(t) = a * t^2 + b * t + c}, where
+#' \code{a} controls curvature, \code{b} is the linear coefficient, and \code{c} is the intercept.
 #'
-#' @param t Numeric value.
-#' @param a Numeric value for coefficient a.
-#' @param b Numeric value for coefficient b.
-#' @param c Numeric value for coefficient c.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param a The quadratic coefficient (curvature).
+#' @param b The linear coefficient (slope at the origin).
+#' @param c The intercept (function value when \code{t = 0}).
 #'
-#' @return A numeric value based on the linear function.
+#' @return A numeric vector of the same length as \code{t}, representing the
+#' quadratic function values.
+#'
 #' @export
 #'
 #' @details
@@ -48,63 +51,66 @@ fn_lin <- function(t, m, b) {
 #' }
 #' }
 #'
+#' This function represents a second-degree polynomial. The sign of \code{a}
+#' determines whether the parabola opens upward (\code{a > 0}) or downward (\code{a < 0}).
+#'
 #' @examples
 #' library(flexFitR)
 #' plot_fn(fn = "fn_quad", params = c(a = 1, b = 10, c = 5))
 fn_quad <- function(t, a, b, c) {
-  y <- a * t^2 + b * t + c
-  return(y)
+  a * t^2 + b * t + c
 }
 
 #' Logistic function
 #'
-#' Computes a value based on a logistic function.
+#' A standard logistic function commonly used to model sigmoidal growth. The
+#' curve rises from near zero to a maximum value \code{k}, with inflection point
+#' at \code{t0} and growth rate \code{a}.
 #'
-#' @param t Numeric value.
-#' @param L Numeric value.
-#' @param k Numeric value.
-#' @param t0 Numeric value.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param a The growth rate (steepness of the curve). Higher values lead to a steeper rise.
+#' @param t0 The time of the inflection point (midpoint of the transition).
+#' @param k The upper asymptote or plateau (maximum value as \code{t -> Inf}).
 #'
-#' @return A numeric value based on the logistic function.
+#' @return A numeric vector of the same length as \code{t}, representing the logistic function values.
 #' @export
 #'
 #' @details
 #' \if{html}{
 #' \deqn{
-#' f(t; L, k, t0) = \frac{L}{1 + e^{-k(t - t_0)}}
+#' f(t; a, t0, k) = \frac{k}{1 + e^{-a(t - t_0)}}
 #' }
 #' }
+#'
+#' This is a classic sigmoid (S-shaped) curve that is symmetric around the
+#' inflection point \code{t0}.
 #'
 #' @examples
 #' library(flexFitR)
 #' plot_fn(
 #'   fn = "fn_logistic",
-#'   params = c(L = 100, k = 0.199, t0 = 47.7),
+#'   params = c(a = 0.199, t0 = 47.7, k = 100),
 #'   interval = c(0, 108),
 #'   n_points = 2000
 #' )
-fn_logistic <- function(t, L, k, t0) {
-  y <- L / (1 + exp(-k * (t - t0)))
-  return(y)
+fn_logistic <- function(t, a, t0, k) {
+  k / (1 + exp(-a * (t - t0)))
 }
 
-#' Exponential linear function 1
+#' Exponential-linear function
 #'
-#' Computes a value based on an exponential growth curve and linear decay model for time.
+#' A piecewise function that models a response with an initial exponential
+#' growth phase followed by a linear phase. Commonly used to describe processes
+#' with rapid early increases that slow into a linear trend, while maintaining
+#' continuity.
 #'
-#' @param t Numeric. The time value.
-#' @param t1 Numeric. The lower threshold time. Assumed to be known.
-#' @param t2 Numeric. The upper threshold time.
-#' @param alpha Numeric. The parameter for the exponential term. Must be greater
-#' than 0.
-#' @param beta Numeric. The parameter for the linear term. Must be less than 0.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The transition time between exponential and linear phases. Must be greater than \code{t1}.
+#' @param alpha The exponential growth rate during the exponential phase.
+#' @param beta The slope of the linear phase after \code{t2}.
 #'
-#' @return A numeric value based on the exponential linear model.
-#' If \code{t} is less than \code{t1}, the function returns 0.
-#' If \code{t} is between \code{t1} and \code{t2} (inclusive),
-#' the function returns \code{exp(alpha * (t - t1)) - 1}.
-#' If \code{t} is greater than \code{t2}, the function returns
-#' \code{beta * (t - t2) + (exp(alpha * (t2 - t1)) - 1)}.
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
 #' @export
 #'
 #' @details
@@ -119,45 +125,44 @@ fn_logistic <- function(t, L, k, t0) {
 #' }
 #' }
 #'
+#' The exponential segment starts from 0 at \code{t1}, and the linear segment
+#' continues smoothly from the end of the exponential part. This ensures value
+#' continuity at \code{t2}, but not necessarily smoothness in slope.
+#'
 #' @examples
 #' library(flexFitR)
 #' plot_fn(
-#'   fn = "fn_exp1_lin",
+#'   fn = "fn_exp_lin",
 #'   params = c(t1 = 35, t2 = 55, alpha = 1 / 20, beta = -1 / 40),
 #'   interval = c(0, 108),
 #'   n_points = 2000,
 #'   auc_label_size = 3
 #' )
-fn_exp1_lin <- function(t, t1, t2, alpha, beta) {
-  if (t < t1) {
-    return(0)
-  }
-  if (t >= t1 && t <= t2) {
-    return(exp(alpha * (t - t1)) - 1)
-  }
-  if (t > t2) {
-    y2 <- exp(alpha * (t2 - t1)) - 1
-    return(beta * (t - t2) + y2)
-  }
+fn_exp_lin <- function(t, t1, t2, alpha, beta) {
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t <= t2,
+      yes = exp(alpha * (t - t1)) - 1,
+      no = beta * (t - t2) + (exp(alpha * (t2 - t1)) - 1)
+    )
+  )
 }
 
-#' Exponential linear function 2
+#' Super-exponential linear function
 #'
-#' Computes a value based on an exponential growth curve and linear decay model for time.
+#' A piecewise function that models an initial exponential growth phase based on
+#' a squared time difference, followed by a linear phase.
 #'
-#' @param t Numeric. The time value.
-#' @param t1 Numeric. The lower threshold time. Assumed to be known.
-#' @param t2 Numeric. The upper threshold time.
-#' @param alpha Numeric. The parameter for the exponential term. Must be greater
-#' than 0.
-#' @param beta Numeric. The parameter for the linear term. Must be less than 0.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The transition time between exponential and linear phases. Must be greater than \code{t1}.
+#' @param alpha The exponential growth rate controlling the curvature of the exponential phase.
+#' @param beta The slope of the linear phase after \code{t2}.
 #'
-#' @return A numeric value based on the exponential linear model.
-#' If \code{t} is less than \code{t1}, the function returns 0.
-#' If \code{t} is between \code{t1} and \code{t2} (inclusive),
-#' the function returns \code{exp(alpha * (t - t1)^2) - 1}.
-#' If \code{t} is greater than \code{t2}, the function returns
-#' \code{beta * (t - t2) + (exp(alpha * (t2 - t1)^2) - 1)}.
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
 #' @export
 #'
 #' @details
@@ -172,6 +177,11 @@ fn_exp1_lin <- function(t, t1, t2, alpha, beta) {
 #' }
 #' }
 #'
+#' The exponential section rises gradually from 0 at \code{t1} and accelerates
+#' as time increases. The linear section starts at \code{t2} with a value
+#' matching the end of the exponential phase, ensuring continuity but not
+#' necessarily matching the derivative.
+#'
 #' @examples
 #' library(flexFitR)
 #' plot_fn(
@@ -182,36 +192,32 @@ fn_exp1_lin <- function(t, t1, t2, alpha, beta) {
 #'   auc_label_size = 3
 #' )
 fn_exp2_lin <- function(t, t1, t2, alpha, beta) {
-  if (t < t1) {
-    return(0)
-  }
-  if (t >= t1 && t <= t2) {
-    return(exp(alpha * (t - t1)^2) - 1)
-  }
-  if (t > t2) {
-    y2 <- exp(alpha * (t2 - t1)^2) - 1
-    return(beta * (t - t2) + y2)
-  }
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t >= t1 & t <= t2,
+      yes = exp(alpha * (t - t1)^2) - 1,
+      no = exp(alpha * (t2 - t1)^2) - 1 + beta * (t - t2)
+    )
+  )
 }
 
-#' Exponential exponential function 1
+#' Double-exponential function
 #'
-#' Computes a value based on an exponential growth curve and exponential decay model for time.
+#' A piecewise function with two exponential phases. The first exponential phase
+#' occurs between \code{t1} and \code{t2}, and the second phase continues after
+#' \code{t2} with a potentially different growth rate. The function ensures
+#' continuity at the transition point but not necessarily smoothness (in derivative).
 #'
-#' @param t Numeric. The time value.
-#' @param t1 Numeric. The lower threshold time. Assumed to be known.
-#' @param t2 Numeric. The upper threshold time.
-#' @param alpha Numeric. The parameter for the first exponential term.
-#' Must be greater than 0.
-#' @param beta Numeric. The parameter for the second exponential term.
-#' Must be less than 0.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The transition time between the two exponential phases. Must be greater than \code{t1}.
+#' @param alpha The exponential growth rate during the first phase (\code{t1} to \code{t2}).
+#' @param beta The exponential growth rate after \code{t2}.
 #'
-#' @return A numeric value based on the double exponential model.
-#' If \code{t} is less than \code{t1}, the function returns 0.
-#' If \code{t} is between \code{t1} and \code{t2} (inclusive),
-#' the function returns \code{exp(alpha * (t - t1)) - 1}.
-#' If \code{t} is greater than \code{t2}, the function returns
-#' \code{(exp(alpha * (t2 - t1)) - 1) * exp(beta * (t - t2))}.
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
 #' @export
 #'
 #' @details
@@ -226,47 +232,46 @@ fn_exp2_lin <- function(t, t1, t2, alpha, beta) {
 #' }
 #' }
 #'
+#' The function rises from 0 starting at \code{t1} with exponential growth rate
+#' \code{alpha}, and transitions to a second exponential phase with rate
+#' \code{beta} at \code{t2}. The value at the transition point is preserved,
+#' ensuring continuity.
+#'
 #' @examples
 #' library(flexFitR)
 #' plot_fn(
-#'   fn = "fn_exp1_exp",
+#'   fn = "fn_exp_exp",
 #'   params = c(t1 = 35, t2 = 55, alpha = 1 / 20, beta = -1 / 30),
 #'   interval = c(0, 108),
 #'   n_points = 2000,
 #'   auc_label_size = 3,
 #'   y_auc_label = 0.2
 #' )
-fn_exp1_exp <- function(t, t1, t2, alpha, beta) {
-  if (t < t1) {
-    return(0)
-  }
-  if (t >= t1 && t <= t2) {
-    return(exp(alpha * (t - t1)) - 1)
-  }
-  if (t > t2) {
-    y2 <- exp(alpha * (t2 - t1)) - 1
-    return(y2 * exp(beta * (t - t2)))
-  }
+fn_exp_exp <- function(t, t1, t2, alpha, beta) {
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t >= t1 & t <= t2,
+      yes = exp(alpha * (t - t1)) - 1,
+      no = (exp(alpha * (t2 - t1)) - 1) * exp(beta * (t - t2))
+    )
+  )
 }
 
-#' Exponential exponential Function 2
+#' Super-exponential exponential function
 #'
-#' Computes a value based on an exponential growth curve and exponential decay model for time.
+#' A piecewise function that models an initial exponential phase with quadratic time dependence,
+#' followed by a second exponential phase with a different growth rate.
 #'
-#' @param t Numeric. The time value.
-#' @param t1 Numeric. The lower threshold time. Assumed to be known.
-#' @param t2 Numeric. The upper threshold time.
-#' @param alpha Numeric. The parameter for the first exponential term.
-#' Must be greater than 0.
-#' @param beta Numeric. The parameter for the second exponential term.
-#' Must be less than 0.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The transition time between the two exponential phases. Must be greater than \code{t1}.
+#' @param alpha The curvature-controlled exponential rate during the first phase (\code{t1} to \code{t2}).
+#' @param beta The exponential growth rate after \code{t2}.
 #'
-#' @return A numeric value based on the double exponential model.
-#' If \code{t} is less than \code{t1}, the function returns 0.
-#' If \code{t} is between \code{t1} and \code{t2} (inclusive),
-#' the function returns \code{exp(alpha * (t - t1)^2) - 1}.
-#' If \code{t} is greater than \code{t2}, the function returns
-#' \code{(exp(alpha * (t2 - t1)^2) - 1) * exp(beta * (t - t2))}.
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
 #' @export
 #'
 #' @details
@@ -292,31 +297,30 @@ fn_exp1_exp <- function(t, t1, t2, alpha, beta) {
 #'   y_auc_label = 0.15
 #' )
 fn_exp2_exp <- function(t, t1, t2, alpha, beta) {
-  if (t < t1) {
-    return(0)
-  }
-  if (t >= t1 && t <= t2) {
-    return(exp(alpha * (t - t1)^2) - 1)
-  }
-  if (t > t2) {
-    y2 <- exp(alpha * (t2 - t1)^2) - 1
-    return(y2 * exp(beta * (t - t2)))
-  }
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t >= t1 & t <= t2,
+      yes = exp(alpha * (t - t1)^2) - 1,
+      no = (exp(alpha * (t2 - t1)^2) - 1) * exp(beta * (t - t2))
+    )
+  )
 }
 
 #' Linear plateau function
 #'
-#' Computes a value based on a linear growth curve reaching a plateau for time.
+#' A simple piecewise function that models a linear increase from zero to a plateau.
+#' The function rises linearly between two time points and then levels off at a constant value.
 #'
-#' @param t Numeric. The time value.
-#' @param t1 Numeric. The lower threshold time. Default is 45.
-#' @param t2 Numeric. The upper threshold time. Default is 80.
-#' @param k Numeric. The maximum value of the function. Default is 0.9. Assumed to be known.
-#' @return A numeric value based on the threshold model.
-#' If \code{t} is less than \code{t1}, the function returns 0.
-#' If \code{t} is between \code{t1} and \code{t2} (inclusive),
-#' the function returns a value between 0 and \code{k} in a linear trend.
-#' If \code{t} is greater than \code{t2}, the function returns \code{k}.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The time at which the plateau begins. Must be greater than \code{t1}.
+#' @param k The height of the plateau. The function linearly increases from
+#' 0 to \code{k} between \code{t1} and \code{t2}, then remains constant.
+#'
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
 #' @export
 #'
 #' @details
@@ -331,68 +335,199 @@ fn_exp2_exp <- function(t, t1, t2, alpha, beta) {
 #' }
 #' }
 #'
+#' This function is continuous but not differentiable at \code{t1} and \code{t2}
+#' due to the piecewise transitions. It is often used in agronomy and ecology
+#' to describe growth until a resource limit or developmental plateau is reached.
+#'
 #' @examples
 #' library(flexFitR)
 #' plot_fn(
-#'   fn = "fn_linear_sat",
+#'   fn = "fn_lin_plat",
 #'   params = c(t1 = 34.9, t2 = 61.8, k = 100),
 #'   interval = c(0, 108),
 #'   n_points = 2000,
 #'   auc_label_size = 3
 #' )
-fn_linear_sat <- function(t, t1 = 45, t2 = 80, k = 0.9) {
-  if (t < t1) {
-    y <- 0
-  } else if (t >= t1 && t <= t2) {
-    y <- k / (t2 - t1) * (t - t1)
-  } else {
-    y <- k
-  }
-  return(y)
+fn_lin_plat <- function(t, t1 = 45, t2 = 80, k = 0.9) {
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t >= t1 & t <= t2,
+      yes = k / (t2 - t1) * (t - t1),
+      no = k
+    )
+  )
 }
 
-#' Sum of Squares Error Function for Piecewise Model
+#' Linear-logistic function
 #'
-#' Calculates the sum of squared errors (SSE) between observed values and values
-#' predicted by the \link{fn_linear_sat} function. This is the objective function to
-#' be minimized in the optimx package.
+#' A piecewise function that models an initial linear increase followed by a logistic saturation.
 #'
-#' @param params Numeric vector. The parameters for the \code{fn_linear_sat} function,
-#' where \code{params[1]} is \code{t1} and \code{params[2]} is \code{t2}.
-#' @param t Numeric vector. The time values.
-#' @param y Numeric vector. The observed values.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The transition time between the linear and logistic phases. Must be greater than \code{t1}.
+#' @param k The plateau height. The function transitions toward this value in the logistic phase.
 #'
-#' @return A numeric value representing the sum of squared errors.
-#' @noRd
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
+#' @export
+#'
+#' @details
+#' \if{html}{
+#' \deqn{
+#' f(t; t_1, t_2, k) =
+#' \begin{cases}
+#' 0 & \text{if } t < t_1 \\
+#' \dfrac{k}{2(t_2 - t_1)} \cdot (t - t_1) & \text{if } t_1 \leq t \leq t_2 \\
+#' \dfrac{k}{1 + e^{-2(t - t_2) / (t_2 - t_1)}} & \text{if } t > t_2
+#' \end{cases}
+#' }
+#' }
+#'
+#' The linear segment rises from 0 starting at \code{t1}, and the logistic segment begins at \code{t2},
+#' smoothly approaching the plateau value \code{k}.
 #'
 #' @examples
 #' library(flexFitR)
-#' x <- c(0, 29, 36, 42, 56, 76, 92, 100, 108)
-#' y <- c(0, 0, 4.379, 26.138, 78.593, 100, 100, 100, 100)
-#' sse_piwise(params = c(34.9, 61.8), t = x, y = y)
+#' plot_fn(
+#'   fn = "fn_lin_logis",
+#'   params = c(t1 = 35, t2 = 50, k = 100),
+#'   interval = c(0, 108),
+#'   n_points = 2000,
+#'   auc_label_size = 3
+#' )
+fn_lin_logis <- function(t, t1, t2, k) {
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t > t1 & t < t2,
+      yes = k / 2 / (t2 - t1) * (t - t1),
+      no = k / (1 + exp(-2 * (t - t2) / (t2 - t1)))
+    )
+  )
+}
+
+#' Quadratic-plateau function
 #'
-#' y_hat <- sapply(x, FUN = fn_linear_sat, t1 = 34.9, t2 = 61.8, k = 100)
-#' sum((y - y_hat)^2)
-sse_piwise <- function(params, t, y) {
-  t1 <- params[1]
-  t2 <- params[2]
-  k <- max(y)
-  y_hat <- sapply(t, FUN = fn_linear_sat, t1 = t1, t2 = t2, k = k)
-  sse <- sum((y - y_hat)^2)
-  return(sse)
+#' Computes a value based on a quadratic-plateau growth curve.
+#'
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The time at which the plateau begins. Must be greater than \code{t1}.
+#' @param b The initial slope of the curve at \code{t1}.
+#' @param k The plateau height. The function transitions to this constant value at \code{t2}.
+#'
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
+#' @export
+#'
+#' @details
+#' \if{html}{
+#' \deqn{
+#' f(t; t_1, t_2, b, k) =
+#' \begin{cases}
+#' 0 & \text{if } t < t_1 \\
+#' b (t - t_1) + \frac{k - b (t_2 - t_1)}{(t_2 - t_1)^2} (t - t_1)^2 & \text{if } t_1 \leq t \leq t_2 \\
+#' k & \text{if } t > t_2
+#' \end{cases}
+#' }
+#' }
+#'
+#' This function allows the user to specify the initial slope \code{b}. The curvature term
+#' is automatically calculated so that the function reaches the plateau value \code{k} exactly
+#' at \code{t2}. The transition to the plateau is continuous in value but not necessarily smooth
+#' in derivative.
+#'
+#' @examples
+#' library(flexFitR)
+#' plot_fn(
+#'   fn = "fn_quad_plat",
+#'   params = c(t1 = 35, t2 = 80, b = 4, k = 100),
+#'   interval = c(0, 108),
+#'   n_points = 2000,
+#'   auc_label_size = 3
+#' )
+fn_quad_plat <- function(t, t1 = 45, t2 = 80, b = 1, k = 100) {
+  c <- suppressWarnings((k - b * (t2 - t1)) / (t2 - t1)^2)
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t >= t1 & t <= t2,
+      yes = b * (t - t1) + c * (t - t1)^2,
+      no = k
+    )
+  )
+}
+
+#' Smooth Quadratic-plateau function
+#'
+#' A piecewise function that models a quadratic increase from zero to a plateau value.
+#' The function is continuous and differentiable, modeling growth
+#' processes with a smooth transition to a maximum response.
+#'
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The time at which the plateau begins. Must be greater than \code{t1}.
+#' @param k The plateau height. The function transitions to this constant value at \code{t2}.
+#'
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
+#' @export
+#'
+#' @details
+#' \if{html}{
+#' \deqn{
+#' f(t; t_1, t_2, k) =
+#' \begin{cases}
+#' 0 & \text{if } t < t_1 \\
+#' -\dfrac{k}{(t_2 - t_1)^2} (t - t_1)^2 + \dfrac{2k}{t_2 - t_1} (t - t_1) & \text{if } t_1 \leq t \leq t_2 \\
+#' k & \text{if } t > t_2
+#' \end{cases}
+#' }
+#' }
+#'
+#' The coefficients of the quadratic section are chosen such that the curve passes through
+#' \code{(t1, 0)} and \code{(t2, k)} with a continuous first derivative (i.e., smooth transition).
+#'
+#' @examples
+#' library(flexFitR)
+#' plot_fn(
+#'   fn = "fn_quad_pl_sm",
+#'   params = c(t1 = 35, t2 = 80, k = 100),
+#'   interval = c(0, 108),
+#'   n_points = 2000,
+#'   auc_label_size = 3
+#' )
+fn_quad_pl_sm <- function(t, t1, t2, k) {
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t <= t2,
+      yes = (-k / (t2 - t1)^2) * (t - t1)^2 + (2 * k / (t2 - t1)) * (t - t1),
+      no = k
+    )
+  )
 }
 
 
 #' Linear plateau linear function
 #'
-#' @param t Numeric. The time value.
-#' @param t1 Numeric. The lower threshold time. Default is 45.
-#' @param t2 Numeric. The upper threshold time before plateau. Default is 80.
-#' @param t3 Numeric. The lower threshold time after plateau. Default is 45.
-#' @param k Numeric. The maximum value of the function. Default is 0.9.
-#' @param beta Numeric. Slope of the linear decay.
+#' A piecewise function that models an initial linear increase up to a plateau,
+#' maintains that plateau for a duration, and then decreases linearly.
 #'
-#' @return A numeric value based on the linear plateau linear model.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The time when the linear growth phase ends and the plateau begins. Must be greater than \code{t1}.
+#' @param t3 The time when the plateau ends and the linear decline begins. Must be greater than \code{t2}.
+#' @param k The height of the plateau. The first linear phase increases to this value, which remains constant until \code{t3}.
+#' @param beta The slope of the final linear phase (typically negative), controlling the rate of decline after \code{t3}.
+#'
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
 #' @export
 #'
 #' @details
@@ -408,6 +543,9 @@ sse_piwise <- function(params, t, y) {
 #' }
 #' }
 #'
+#' The function transitions continuously between all three phases but is not
+#' differentiable at the transition points \code{t1}, \code{t2}, and \code{t3}.
+#'
 #' @examples
 #' library(flexFitR)
 #' plot_fn(
@@ -418,31 +556,37 @@ sse_piwise <- function(params, t, y) {
 #'   auc_label_size = 3
 #' )
 fn_lin_pl_lin <- function(t, t1, t2, t3, k, beta) {
-  if (t < t1) {
-    return(0)
-  }
-  if (t >= t1 && t <= t2) {
-    y <- k / (t2 - t1) * (t - t1)
-  }
-  if (t >= t2 && t <= t3) {
-    y <- k
-  }
-  if (t >= t3) {
-    y <- k + beta * (t - t3)
-  }
-  return(y)
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t >= t1 & t <= t2,
+      yes = k / (t2 - t1) * (t - t1),
+      no = ifelse(
+        test = t > t2 & t <= t3,
+        yes = k,
+        no = k + beta * (t - t3)
+      )
+    )
+  )
 }
 
 #' Linear plateau linear with constrains
 #'
-#' @param t Numeric. The time value.
-#' @param t1 Numeric. The lower threshold time.
-#' @param t2 Numeric. The upper threshold time before plateau.
-#' @param dt Numeric. dt = t3 - t2.
-#' @param k Numeric. The maximum value of the function.
-#' @param beta Numeric. Slope of the linear decay.
+#' A piecewise function that models an initial linear increase to a plateau, followed by a specified
+#' duration of stability, and then a linear decline. This version parameterizes the plateau using
+#' its duration rather than an explicit end time, making it convenient for box type of constraints
+#' optimizations.
 #'
-#' @return A numeric value based on the linear plateau linear model.
+#' @param t A numeric vector of input values (e.g., time).
+#' @param t1 The onset time of the response. The function is 0 for all values less than \code{t1}.
+#' @param t2 The time when the linear growth phase ends and the plateau begins. Must be greater than \code{t1}.
+#' @param dt The duration of the plateau phase. The plateau ends at \code{t2 + dt}.
+#' @param k The height of the plateau. The linear phase increases to this value, which remains constant for \code{dt} units of time.
+#' @param beta The slope of the decline phase that begins after the plateau. Typically negative.
+#'
+#' @return A numeric vector of the same length as \code{t}, representing the function values.
+#'
 #' @export
 #'
 #' @details
@@ -468,81 +612,27 @@ fn_lin_pl_lin <- function(t, t1, t2, t3, k, beta) {
 #'   auc_label_size = 3
 #' )
 fn_lin_pl_lin2 <- function(t, t1, t2, dt, k, beta) {
-  if (t < t1) {
-    return(0)
-  }
-  if (t >= t1 && t <= t2) {
-    y <- k / (t2 - t1) * (t - t1)
-  }
-  if (t >= t2 && t <= (t2 + dt)) {
-    y <- k
-  }
-  if (t >= (t2 + dt)) {
-    y <- k + beta * (t - (t2 + dt))
-  }
-  return(y)
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(
+      test = t >= t1 & t <= t2,
+      yes = k / (t2 - t1) * (t - t1),
+      no = ifelse(
+        test = t > t2 & t <= (t2 + dt),
+        yes = k,
+        no = k + beta * (t - (t2 + dt))
+      )
+    )
+  )
 }
-
-#' Linear Plateau Linear Constrains
-#'
-#' @param t Numeric. The time value.
-#' @param t1 Numeric. The lower threshold time. Default is 45.
-#' @param t2 Numeric. The upper threshold time before plateau. Default is 80.
-#' @param t3 Numeric. The lower threshold time after plateau. Default is 45.
-#' @param k Numeric. The maximum value of the function. Default is 0.9.
-#' @param beta Numeric. Slope of the linear decay.
-#'
-#' @return A numeric value based on the linear plateau linear model.
-#' @noRd
-#'
-#' @details
-#' \if{html}{
-#' \deqn{
-#' f(t; t_1, t_2, t_3, k, \beta) =
-#' \begin{cases}
-#' 0 & \text{if } t < t_1 \\
-#' \dfrac{k}{t_2 - t_1} \cdot (t - t_1) & \text{if } t_1 \leq t \leq t_2 \\
-#' k & \text{if } t_2 \leq t \leq t_3 \\
-#' k + \beta \cdot (t - t_3) & \text{if } t > t_3
-#' \end{cases}
-#' }
-#' }
-#'
-#' @examples
-#' library(flexFitR)
-#' plot_fn(
-#'   fn = "fn_lin_pl_lin3",
-#'   params = c(t1 = 38.7, t2 = 62, t3 = 90, k = 0.32, beta = -0.01),
-#'   interval = c(0, 108),
-#'   n_points = 2000,
-#'   auc_label_size = 3
-#' )
-fn_lin_pl_lin3 <- function(t, t1, t2, t3, k, beta) {
-  if (t < t1) {
-    y <- 0
-  }
-  if (t >= t1 && t <= t2) {
-    y <- k / (t2 - t1) * (t - t1)
-  }
-  if (t >= t2 && t <= t3) {
-    y <- k
-  }
-  if (t >= t3) {
-    y <- k + beta * (t - t3)
-  }
-  if (t3 - t2 < 0) {
-    y <- 1e+200
-  }
-  return(y)
-}
-
 
 #' @examples
 #' params <- c(t1 = 34.9, t2 = 61.8)
 #' fixed <- c(k = 90)
 #' t <- c(0, 29, 36, 42, 56, 76, 92, 100, 108)
 #' y <- c(0, 0, 4.379, 26.138, 78.593, 100, 100, 100, 100)
-#' fn <- "fn_linear_sat"
+#' fn <- "fn_lin_plat"
 #' minimizer(params, t, y, fn, fixed_params = fixed, metric = "rmse")
 #' res <- opm(
 #'   par = params,
@@ -558,92 +648,78 @@ fn_lin_pl_lin3 <- function(t, t1, t2, t3, k, beta) {
 #' ) |>
 #'   cbind(t(fixed))
 #' @noRd
+#' @importFrom stats setNames
 minimizer <- function(params,
                       t,
                       y,
                       curve,
                       fixed_params = NA,
-                      metric = "sse",
                       trace = FALSE) {
-  arg <- names(formals(curve))[-1]
-  values <- paste(params, collapse = ", ")
+  # Extract curve parameter names
+  args <- names(formals(curve))
+  arg_names <- args[-1]
+  # Combine fixed and free parameters
+  full_params <- setNames(rep(NA, length(arg_names)), arg_names)
   if (!any(is.na(fixed_params))) {
-    names(params) <- arg[!arg %in% names(fixed_params)]
-    values <- paste(
-      paste(names(params), params, sep = " = "),
-      collapse = ", "
-    )
-    fix <- paste(
-      paste(names(fixed_params), fixed_params, sep = " = "),
-      collapse = ", "
-    )
-    values <- paste(values, fix, sep = ", ")
+    full_params[names(fixed_params)] <- fixed_params
   }
-  string <- paste("sapply(t, FUN = ", curve, ", ", values, ")", sep = "")
-  y_hat <- eval(parse(text = string))
-  sse <- eval(parse(text = paste0(metric, "(y, y_hat)"))) # sum((y - y_hat)^2)
-  if (trace) cat(paste0("\t", values, ", sse = ", sse, "\n"))
-  return(sse)
+  free_param_names <- setdiff(arg_names, names(fixed_params))
+  full_params[free_param_names] <- params
+  # Create argument list
+  curve_args <- as.list(full_params)
+  # Evaluate curve function
+  x_val <- setNames(list(t), args[1])
+  y_hat <- do.call(curve, c(x_val, curve_args))
+  # Evaluate metric
+  score <- sse(y, y_hat)
+  # Optional tracing
+  if (trace) {
+    str <- paste(
+      names(full_params),
+      signif(unlist(full_params), 4),
+      sep = " = ",
+      collapse = ", "
+    )
+    cat(paste0("\t", str, ", sse = ", signif(score, 6), "\n"))
+  }
+  return(score)
 }
+# minimizer <- function(params,
+#                       t,
+#                       y,
+#                       curve,
+#                       fixed_params = NA,
+#                       metric = "sse",
+#                       trace = FALSE) {
+#   arg <- names(formals(curve))[-1]
+#   values <- paste(params, collapse = ", ")
+#   if (!any(is.na(fixed_params))) {
+#     names(params) <- arg[!arg %in% names(fixed_params)]
+#     values <- paste(
+#       paste(names(params), params, sep = " = "),
+#       collapse = ", "
+#     )
+#     fix <- paste(
+#       paste(names(fixed_params), fixed_params, sep = " = "),
+#       collapse = ", "
+#     )
+#     values <- paste(values, fix, sep = ", ")
+#   }
+#   string <- paste("sapply(t, FUN = ", curve, ", ", values, ")", sep = "")
+#   y_hat <- eval(parse(text = string))
+#   sse <- eval(parse(text = paste0(metric, "(y, y_hat)"))) # sum((y - y_hat)^2)
+#   if (trace) cat(paste0("\t", values, ", sse = ", sse, "\n"))
+#   return(sse)
+# }
 
 #' @noRd
-create_call <- function(fn = "fn_linear_sat") {
+create_call <- function(fn = "fn_lin_plat") {
   arg <- formals(fn)
   values <- paste(names(arg)[-1], collapse = ", ")
   string <- paste(fn, "(x, ", values, ")", sep = "")
   out <- rlang::parse_expr(string)
   return(out)
 }
-
-#' @noRd
-fn_logis <- function(t, t0, t1, t2) {
-  t0 / (1 + exp((t1 - t) / t2))
-}
-
-# library(flexFitR)
-# t <- seq(0, 108, 0.1)
-# y_hat <- sapply(
-#   X = t,
-#   FUN = fn_logistic2,
-#   t1 = 38.7, t2 = 62, L = 0.1, k = 0.9
-# )
-# plot(t, y_hat, type = "l")
-# lines(t, y_hat, col = "red")
-# abline(v = c(38.7, 62), lty = 2)
-#' @noRd
-fn_logistic2 <- function(t, t1, t2, L, k) {
-  # L is the maximum plant height
-  # k is the growth rate
-  if (t < t1) {
-    return(0)
-  }
-  return(L / (1 + exp(-k * (t - (t1 + t2) / 2))))
-}
-
-# t <- seq(0, 108, 0.1)
-# y_hat <- sapply(
-#   X = t,
-#   FUN = fn_linexp,
-#   t1 = 38.7, t2 = 62, a = 0.1, b = 2, c = 0.1
-# )
-# plot(t, y_hat, type = "l")
-# lines(t, y_hat, col = "red")
-# abline(v = c(38.7, 62), lty = 2)
-#' @noRd
-fn_linexp <- function(t, t1, t2, a, b, c) {
-  # a, b, c are model parameters
-  if (t < t1) {
-    return(0)
-  }
-  if (t >= t1 && t <= t2) {
-    return(a + b * (t - t1))
-  }
-  if (t > t2) {
-    y2 <- a + b * (t2 - t1)
-    return(y2 * exp(-c * (t - t2)))
-  }
-}
-
 
 #' Print available functions in flexFitR
 #'
@@ -658,11 +734,14 @@ list_funs <- function() {
     "fn_lin",
     "fn_quad",
     "fn_logistic",
-    "fn_linear_sat",
+    "fn_lin_plat",
+    "fn_lin_logis",
+    "fn_quad_plat",
+    "fn_quad_pl_sm",
     "fn_lin_pl_lin",
     "fn_lin_pl_lin2",
-    "fn_exp1_exp",
-    "fn_exp1_lin",
+    "fn_exp_exp",
+    "fn_exp_lin",
     "fn_exp2_exp",
     "fn_exp2_lin"
   )
@@ -690,13 +769,10 @@ list_methods <- function(bounds = FALSE, check_package = FALSE) {
     "Rcgmin",
     "Rtnmin",
     "Rvmmin",
-    "snewton",
-    "snewtonm",
     "spg",
     "ucminf",
     "newuoa",
     "bobyqa",
-    "uobyqa",
     "nmkb",
     "hjkb",
     "hjn",
@@ -709,8 +785,7 @@ list_methods <- function(bounds = FALSE, check_package = FALSE) {
     "tnewt",
     "anms",
     "pracmanm",
-    "nlnm",
-    "snewtm"
+    "nlnm"
   )
   packages <- c(
     "stats",
@@ -723,11 +798,8 @@ list_methods <- function(bounds = FALSE, check_package = FALSE) {
     "optimx",
     "optimx",
     "optimx",
-    "optimx",
-    "optimx",
     "BB",
     "ucminf",
-    "minqa",
     "minqa",
     "minqa",
     "dfoptim",
@@ -742,8 +814,7 @@ list_methods <- function(bounds = FALSE, check_package = FALSE) {
     "nloptr",
     "pracma",
     "pracma",
-    "nloptr",
-    "optimx"
+    "nloptr"
   )
   names(methods) <- packages
   if (check_package) {

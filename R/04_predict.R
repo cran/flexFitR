@@ -27,6 +27,9 @@
 #' @param formula A formula specifying a function of the parameters to be estimated (e.g., \code{~ b * 500}). Default is \code{NULL}.
 #' @param metadata Logical. If \code{TRUE}, metadata is included with the
 #' predictions. Default is \code{FALSE}.
+#' @param parallel Logical. If \code{TRUE} the prediction is performed in parallel. Default is \code{FALSE}.
+#' Use only when a large number of groups are being analyzed and \code{x} is a grid of values.
+#' @param workers The number of parallel processes to use. \code{parallel::detectCores()}
 #' @param ... Additional parameters for future functionality.
 #' @author Johan Aparicio [aut]
 #' @method predict modeler
@@ -41,7 +44,7 @@
 #'     x = DAP,
 #'     y = Canopy,
 #'     grp = Plot,
-#'     fn = "fn_linear_sat",
+#'     fn = "fn_lin_plat",
 #'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
 #'     subset = c(15, 2, 45)
 #'   )
@@ -65,7 +68,9 @@ predict.modeler <- function(object,
                             se_interval = c("confidence", "prediction"),
                             n_points = 1000,
                             formula = NULL,
-                            metadata = FALSE, ...) {
+                            metadata = FALSE,
+                            parallel = FALSE,
+                            workers = NULL, ...) {
   # Check the class of object
   if (!inherits(object, "modeler")) {
     stop("The object should be of class 'modeler'.")
@@ -88,6 +93,20 @@ predict.modeler <- function(object,
   fit_list <- object$fit
   id <- which(unlist(lapply(fit_list, function(x) x$uid)) %in% uid)
   fit_list <- fit_list[id]
+  # Parallel
+  `%dofu%` <- doFuture::`%dofuture%`
+  if (parallel) {
+    workers <- ifelse(
+      test = is.null(workers),
+      yes = round(parallel::detectCores() * .5),
+      no = workers
+    )
+    future::plan(future::multisession, workers = workers)
+    on.exit(future::plan(future::sequential), add = TRUE)
+  } else {
+    future::plan(future::sequential)
+  }
+  iter <- seq_along(fit_list)
   # Point Estimation
   if (type == "point") {
     if (is.null(x)) {
@@ -98,18 +117,18 @@ predict.modeler <- function(object,
     if (!all(limit_inf <= x & x <= limit_sup)) {
       stop("x needs to be in the interval <", limit_inf, ", ", limit_sup, ">")
     }
-    predictions <- do.call(
-      what = rbind,
-      args = suppressWarnings(
-        lapply(
-          X = fit_list,
-          FUN = .delta_method,
-          x_new = x,
-          se_interval = se_interval
-        )
+    predictions <- foreach(
+      i = iter,
+      .combine = rbind,
+      .options.future = list(
+        seed = TRUE,
+        globals = structure(TRUE, add = object$fun)
       )
-    ) |>
-      as_tibble()
+    ) %dofu% {
+      suppressWarnings(
+        .delta_method(fit = fit_list[[i]], x_new = x, se_interval = se_interval)
+      )
+    } |> as_tibble()
   }
   # Area under the curve
   if (type == "auc") {
@@ -125,18 +144,18 @@ predict.modeler <- function(object,
       limit_sup <- x[2]
     }
     x <- c(limit_inf, limit_sup)
-    predictions <- do.call(
-      what = rbind,
-      args = suppressWarnings(
-        lapply(
-          X = fit_list,
-          FUN = .delta_method_auc,
-          x_new = x,
-          n_points = n_points
-        )
+    predictions <- foreach(
+      i = iter,
+      .combine = rbind,
+      .options.future = list(
+        seed = TRUE,
+        globals = structure(TRUE, add = object$fun)
       )
-    ) |>
-      as_tibble()
+    ) %dofu% {
+      suppressWarnings(
+        .delta_method_auc(fit = fit_list[[i]], x_new = x, n_points = n_points)
+      )
+    } |> as_tibble()
   }
   # Derivatives
   if (type %in% c("fd", "sd")) {
@@ -148,18 +167,18 @@ predict.modeler <- function(object,
     if (!all(limit_inf <= x & x <= limit_sup)) {
       stop("x needs to be in the interval <", limit_inf, ", ", limit_sup, ">")
     }
-    predictions <- do.call(
-      what = rbind,
-      args = suppressWarnings(
-        lapply(
-          X = fit_list,
-          FUN = .delta_method_deriv,
-          x_new = x,
-          which = type
-        )
+    predictions <- foreach(
+      i = iter,
+      .combine = rbind,
+      .options.future = list(
+        seed = TRUE,
+        globals = structure(TRUE, add = object$fun)
       )
-    ) |>
-      as_tibble()
+    ) %dofu% {
+      suppressWarnings(
+        .delta_method_deriv(fit = fit_list[[i]], x_new = x, which = type)
+      )
+    } |> as_tibble()
   }
   # Formula
   if (type %in% c("formula")) {
@@ -189,7 +208,28 @@ predict.modeler <- function(object,
   }
 }
 
-# Delta method point estimation
+#' Delta method point estimation
+#' @param fit A fit object which is located inside a modeler object
+#' @param x_new  A vector of x values to evaluate the function.
+#' @param se_interval A character string. "confidence" or "prediction".
+#' @return A data.frame of the evaluated values.
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_lin_plat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' print(mod_1)
+#' # Point Prediction
+#' predict(mod_1, x = 45, type = "point", id = 2)
+#' @export
+#' @keywords internal
 .delta_method <- function(fit, x_new, se_interval = "confidence") {
   curve <- fit$fn_name
   tt <- fit$hessian
@@ -197,11 +237,13 @@ predict.modeler <- function(object,
   varerr <- fit$param$sse / rdf
   vcov_mat <- try(solve(tt) * 2 * varerr, silent = TRUE)
   best <- fit$details$method
-  estimated_params <- coef(fit$kkopt)[best, ]
+  estimated_params <- fit$type |>
+    dplyr::filter(type == "estimable") |>
+    dplyr::pull(value, name = parameter)
   uid <- fit$uid
   fix_params <- fit$type |>
-    filter(type == "fixed") |>
-    pull(value, name = parameter)
+    dplyr::filter(type == "fixed") |>
+    dplyr::pull(value, name = parameter)
   if (length(fix_params) == 0) fix_params <- NA
   jac_matrix <- numDeriv::jacobian(
     func = ff,
@@ -233,40 +275,73 @@ predict.modeler <- function(object,
     predicted.value = predicted_values,
     std.error = std_errors
   )
-  results <- full_join(
-    x = select(fit$param, uid),
+  results <- dplyr::full_join(
+    x = dplyr::select(fit$param, uid),
     y = results,
     by = "uid"
   )
 }
 
-# Function for point estimation
+#' Function for point estimation
+#' @param params A vector of parameter values.
+#' @param x_new A vector of x values to evaluate the function.
+#' @param curve A string. The name of the function used for curve fitting.
+#' @param fixed_params A vector of fixed parameter values. NA by default.
+#' @return A vector of the evaluated values.
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_lin_plat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' print(mod_1)
+#' # Point Prediction
+#' predict(mod_1, x = 45, type = "point", id = 2)
+#' @export
+#' @keywords internal
 ff <- function(params, x_new, curve, fixed_params = NA) {
-  arg <- names(formals(curve))[-1]
-  values <- paste(params, collapse = ", ")
+  args <- names(formals(curve))
+  arg_names <- args[-1]
+  full_params <- setNames(rep(NA, length(arg_names)), arg_names)
   if (!any(is.na(fixed_params))) {
-    names(params) <- arg[!arg %in% names(fixed_params)]
-    values <- paste(
-      paste(names(params), params, sep = " = "),
-      collapse = ", "
-    )
-    fix <- paste(
-      paste(names(fixed_params), fixed_params, sep = " = "),
-      collapse = ", "
-    )
-    values <- paste(values, fix, sep = ", ")
-  } else {
-    values <- paste(
-      paste(names(params), params, sep = " = "),
-      collapse = ", "
-    )
+    full_params[names(fixed_params)] <- fixed_params
   }
-  string <- paste("sapply(x_new, FUN = ", curve, ", ", values, ")", sep = "")
-  y_hat <- eval(parse(text = string))
+  free_param_names <- setdiff(arg_names, names(fixed_params))
+  full_params[free_param_names] <- params
+  curve_args <- as.list(full_params)
+  x_val <- setNames(list(as.numeric(x_new)), args[1])
+  y_hat <- do.call(curve, c(x_val, curve_args))
   return(y_hat)
 }
 
-# Delta method AUC estimation
+#' Delta method AUC estimation
+#' @param fit A fit object which is located inside a modeler object
+#' @param x_new  A vector of size 2 given the interval to calculate the area under.
+#' @param n_points Numeric value giving the number of points to use in the trapezoidal method.
+#' @return A data.frame of the evaluated values.
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_lin_plat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' print(mod_1)
+#' # AUC Prediction
+#' predict(mod_1, x = c(0, 108), type = "auc", id = 2)
+#' @export
+#' @keywords internal
 .delta_method_auc <- function(fit, x_new, n_points = 1000) {
   curve <- fit$fn_name
   tt <- fit$hessian
@@ -274,11 +349,13 @@ ff <- function(params, x_new, curve, fixed_params = NA) {
   varerr <- fit$param$sse / rdf
   vcov_mat <- try(solve(tt) * 2 * varerr, silent = TRUE)
   best <- fit$details$method
-  estimated_params <- coef(fit$kkopt)[best, ]
+  estimated_params <- fit$type |>
+    dplyr::filter(type == "estimable") |>
+    dplyr::pull(value, name = parameter)
   uid <- fit$uid
   fix_params <- fit$type |>
-    filter(type == "fixed") |>
-    pull(value, name = parameter)
+    dplyr::filter(type == "fixed") |>
+    dplyr::pull(value, name = parameter)
   if (length(fix_params) == 0) fix_params <- NA
   jac_matrix <- numDeriv::jacobian(
     func = ff_auc,
@@ -310,38 +387,77 @@ ff <- function(params, x_new, curve, fixed_params = NA) {
     predicted.value = predicted_values,
     std.error = std_errors
   )
-  results <- full_join(
-    x = select(fit$param, uid),
+  results <- dplyr::full_join(
+    x = dplyr::select(fit$param, uid),
     y = results,
     by = "uid"
   )
 }
 
-# Function for AUC estimation
+#' Function for AUC estimation
+#' @param params A vector of parameter values.
+#' @param x_new A vector of size 2 given the interval to calculate the area under.
+#' @param curve A string. The name of the function used for curve fitting.
+#' @param fixed_params A vector of fixed parameter values. NA by default.
+#' @param n_points Numeric value giving the number of points to use in the trapezoidal method.
+#' @return Area under the fitted curve.
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_lin_plat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' print(mod_1)
+#' # AUC Prediction
+#' predict(mod_1, x = c(0, 108), type = "auc", id = 2)
+#' @export
+#' @keywords internal
 ff_auc <- function(params, x_new, curve, fixed_params = NA, n_points = 1000) {
-  arg <- names(formals(curve))[-1]
-  values <- paste(params, collapse = ", ")
+  args <- names(formals(curve))
+  arg_names <- args[-1]
+  full_params <- setNames(rep(NA, length(arg_names)), arg_names)
   if (!any(is.na(fixed_params))) {
-    names(params) <- arg[!arg %in% names(fixed_params)]
-    values <- paste(
-      paste(names(params), params, sep = " = "),
-      collapse = ", "
-    )
-    fix <- paste(
-      paste(names(fixed_params), fixed_params, sep = " = "),
-      collapse = ", "
-    )
-    values <- paste(values, fix, sep = ", ")
+    full_params[names(fixed_params)] <- fixed_params
   }
+  free_param_names <- setdiff(arg_names, names(fixed_params))
+  full_params[free_param_names] <- params
+  curve_args <- as.list(full_params)
   x <- seq(x_new[1], x_new[2], length.out = n_points)
-  string <- paste("sapply(x, FUN = ", curve, ", ", values, ")", sep = "")
-  y_hat <- eval(parse(text = string))
+  x_val <- setNames(list(x), args[1])
+  y_hat <- do.call(curve, c(x_val, curve_args))
   trapezoid_area <- (lead(y_hat) + y_hat) / 2 * (lead(x) - x)
   auc <- sum(trapezoid_area, na.rm = TRUE)
   return(auc)
 }
 
-# Delta method for derivative estimation
+#' Delta method for derivative estimation
+#' @param fit A fit object which is located inside a modeler object
+#' @param x_new A vector of x values to evaluate the derivative.
+#' @param which Can be "fd" for first-derivative or "sd" for second-derivative.
+#' @return A data.frame of the evaluated values.
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_lin_plat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' print(mod_1)
+#' # First Derivative
+#' predict(mod_1, x = 45, type = "fd", id = 2)
+#' @export
+#' @keywords internal
 .delta_method_deriv <- function(fit, x_new, which = "fd") {
   curve <- fit$fn_name
   tt <- fit$hessian
@@ -349,11 +465,13 @@ ff_auc <- function(params, x_new, curve, fixed_params = NA, n_points = 1000) {
   varerr <- fit$param$sse / rdf
   vcov_mat <- try(solve(tt) * 2 * varerr, silent = TRUE)
   best <- fit$details$method
-  estimated_params <- coef(fit$kkopt)[best, ]
+  estimated_params <- fit$type |>
+    dplyr::filter(type == "estimable") |>
+    dplyr::pull(value, name = parameter)
   uid <- fit$uid
   fix_params <- fit$type |>
-    filter(type == "fixed") |>
-    pull(value, name = parameter)
+    dplyr::filter(type == "fixed") |>
+    dplyr::pull(value, name = parameter)
   if (length(fix_params) == 0) fix_params <- NA
   jac_matrix <- numDeriv::jacobian(
     func = ff_deriv,
@@ -384,14 +502,37 @@ ff_auc <- function(params, x_new, curve, fixed_params = NA, n_points = 1000) {
     predicted.value = predicted_values,
     std.error = std_errors
   )
-  results <- full_join(
-    x = select(fit$param, uid),
+  results <- dplyr::full_join(
+    x = dplyr::select(fit$param, uid),
     y = results,
     by = "uid"
   )
 }
 
-# Function for derivatives
+#' Function for derivatives
+#' @param params A vector of parameter values.
+#' @param x_new A vector of x values to evaluate the derivative.
+#' @param curve A string. The name of the function used for curve fitting.
+#' @param fixed_params A vector of fixed parameter values. NA by default.
+#' @param which Can be "fd" for first-derivative or "sd" for second-derivative.
+#' @return First or second derivative.
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_lin_plat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' print(mod_1)
+#' # First Derivative
+#' predict(mod_1, x = 45, type = "fd", id = 2)
+#' @export
+#' @keywords internal
 ff_deriv <- function(params, x_new, curve, fixed_params = NA, which = "fd") {
   arg <- names(formals(curve))[-1]
   values <- paste(params, collapse = ", ")
@@ -429,7 +570,27 @@ ff_deriv <- function(params, x_new, curve, fixed_params = NA, which = "fd") {
   }
 }
 
-# Delta method generic function
+#' Delta method generic function
+#' @param fit A fit object which is located inside a modeler object
+#' @param formula A formula specifying a function of the parameters to be estimated (e.g., \code{~ b * 500}). Default is \code{NULL}.
+#' @return A data.frame of the evaluated formula.
+#' @examples
+#' library(flexFitR)
+#' data(dt_potato)
+#' mod_1 <- dt_potato |>
+#'   modeler(
+#'     x = DAP,
+#'     y = Canopy,
+#'     grp = Plot,
+#'     fn = "fn_lin_plat",
+#'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
+#'     subset = c(15, 2, 45)
+#'   )
+#' print(mod_1)
+#' # Function of the parameters
+#' predict(mod_1, formula = ~ t2 - t1, id = 2)
+#' @export
+#' @keywords internal
 .delta_method_gen <- function(fit, formula) {
   curve <- fit$fn_name
   tt <- fit$hessian
@@ -437,7 +598,9 @@ ff_deriv <- function(params, x_new, curve, fixed_params = NA, which = "fd") {
   varerr <- fit$param$sse / rdf
   vcov_mat <- try(solve(tt) * 2 * varerr, silent = TRUE)
   best <- fit$details$method
-  estimated_params <- coef(fit$kkopt)[best, ]
+  estimated_params <- fit$type |>
+    dplyr::filter(type == "estimable") |>
+    dplyr::pull(value, name = parameter)
   uid <- fit$uid
   params <- all.vars(formula)
   estimated_params <- estimated_params[names(estimated_params) %in% params]
@@ -469,5 +632,9 @@ ff_deriv <- function(params, x_new, curve, fixed_params = NA, which = "fd") {
     predicted.value = predicted_values,
     std.error = std_errors
   )
-  results <- full_join(x = select(fit$param, uid), y = results, by = "uid")
+  results <- dplyr::full_join(
+    x = dplyr::select(fit$param, uid),
+    y = results,
+    by = "uid"
+  )
 }

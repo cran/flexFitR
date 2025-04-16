@@ -7,6 +7,8 @@
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/flexFitR)](https://CRAN.R-project.org/package=flexFitR)
+[![Lifecycle:
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
 `{flexFitR}` is an R package designed for efficient modeling and
@@ -33,22 +35,22 @@ devtools::install_github("AparicioJohan/flexFitR")
 
 ## Features
 
-- Parameter Estimation: Utilizes `{optimx}` and derivative-free
-  algorithms to solve and estimate parameters for a given function.
+- Parameter Estimation: Utilizes `{optimx}` algorithms to solve and
+  estimate parameters for a given function.
 - Parallelization: Implements parallel processing using the `{future}`
   package, enabling efficient fitting of hundreds of curves
   simultaneously.
 - Visualization Tools: Provides a variety of plots to visualize model
-  fits, correlations, predictions, and more.
+  fits, correlations, predictions, derivatives, and more.
 - Statistical Rigor: Offers standard errors and p-values for
   coefficients, as well as for predictions, supporting robust
   conclusions and interpretations.
 - Prediction: Supports diverse prediction types, including point
   predictions, area under the curve (AUC), first and second derivatives,
-  user-defined parameter functions, and more advanced transformations or
-  custom expressions based on model parameters.
+  and custom expressions based on model parameters.
 - Flexibility: Allows users to fix certain parameters in the model and
-  specify different initial values per grouping factor.
+  specify different initial values per grouping factor, accepting both
+  numerical inputs and expressions.
 - Custom Modeling Functions: Equipped with built-in modeling functions
   for common analysis tasks, while also permitting users to supply their
   own custom functions.
@@ -71,25 +73,22 @@ plot(explorer(dt, time, variable), type = "xy")
 <img src="man/figures/README_unnamed-chunk-2-1.png" alt="plot xy" width="100%" />
 
 ``` r
-fn_linear_sat <- function(t, t1 = 45, t2 = 80, k = 0.9) {
-  if (t < t1) {
-    y <- 0
-  } else if (t >= t1 && t <= t2) {
-    y <- k / (t2 - t1) * (t - t1)
-  } else {
-    y <- k
-  }
-  return(y)
+fn_lin_plat <- function(t, t1 = 45, t2 = 80, k = 0.9) {
+  ifelse(
+    test = t < t1,
+    yes = 0,
+    no = ifelse(t >= t1 & t <= t2, k / (t2 - t1) * (t - t1), k)
+  )
 }
 ```
 
 ``` r
-# Fitting a linear saturation function
+# Fitting a linear plateau function
 mod_1 <- dt |>
   modeler(
     x = time,
     y = variable,
-    fn = "fn_linear_sat",
+    fn = "fn_lin_plat",
     parameters = c(t1 = 45, t2 = 80, k = 90)
   )
 ```
@@ -98,9 +97,9 @@ mod_1 <- dt |>
 print(mod_1)
 
 Call:
-variable ~ fn_linear_sat(time, t1, t2, k) 
+variable ~ fn_lin_plat(time, t1, t2, k) 
 
-Residuals (Standardized):
+Residuals (`Standardized`):
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.0000  0.0000  0.0000  0.2722  0.0000  2.4495 
 
@@ -110,7 +109,7 @@ Optimization Results `head()`:
 
 Metrics:
  Groups      Timing Convergence Iterations
-      1 0.6083 secs        100%   511 (id)
+      1 0.1074 secs        100%   511 (id)
 ```
 
 ``` r
@@ -124,11 +123,11 @@ plot(mod_1)
 # Coefficients
 coef(mod_1)
 # A tibble: 3 × 7
-    uid fn_name       coefficient solution std.error `t value` `Pr(>|t|)`
-  <dbl> <chr>         <chr>          <dbl>     <dbl>     <dbl>      <dbl>
-1     1 fn_linear_sat t1              38.6    0.0779      496.   4.54e-15
-2     1 fn_linear_sat t2              61.0    0.0918      665.   7.82e-16
-3     1 fn_linear_sat k               99.8    0.137       730.   4.47e-16
+    uid fn_name     coefficient solution std.error `t value` `Pr(>|t|)`
+  <dbl> <chr>       <chr>          <dbl>     <dbl>     <dbl>      <dbl>
+1     1 fn_lin_plat t1              38.6    0.0779      496.   4.54e-15
+2     1 fn_lin_plat t2              61.0    0.0918      665.   7.82e-16
+3     1 fn_lin_plat k               99.8    0.137       730.   4.47e-16
 ```
 
 ``` r
@@ -140,16 +139,16 @@ t1  6.061705e-03 -0.002940001 1.877072e-07
 t2 -2.940001e-03  0.008431400 4.204939e-03
 k   1.877072e-07  0.004204939 1.870426e-02
 attr(,"fn_name")
-[1] "fn_linear_sat"
+[1] "fn_lin_plat"
 ```
 
 ``` r
 # Making predictions
 predict(mod_1, x = 45)
 # A tibble: 1 × 5
-    uid fn_name       x_new predicted.value std.error
-  <dbl> <chr>         <dbl>           <dbl>     <dbl>
-1     1 fn_linear_sat    45            28.5     0.223
+    uid fn_name     x_new predicted.value std.error
+  <dbl> <chr>       <dbl>           <dbl>     <dbl>
+1     1 fn_lin_plat    45            28.5     0.223
 ```
 
 ## Documentation

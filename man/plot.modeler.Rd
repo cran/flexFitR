@@ -10,11 +10,13 @@
   type = 1,
   label_size = 4,
   base_size = 14,
+  linewidth = 0.5,
   color = "red",
   color_points = "black",
   parm = NULL,
   n_points = 1000,
   title = NULL,
+  add_points = FALSE,
   add_ci = TRUE,
   color_ci = "blue",
   color_pi = "red",
@@ -44,6 +46,8 @@
 
 \item{base_size}{Numeric value for the base font size in pts. Default is 14.}
 
+\item{linewidth}{Numeric value specifying size of line geoms. Default is 0.5.}
+
 \item{color}{Character string specifying the color for the fitted line when \code{type = 1}. Default is "red".}
 
 \item{color_points}{Character string specifying the color for the raw data points when \code{type = 1}. Default is "black".}
@@ -53,6 +57,8 @@
 \item{n_points}{Numeric value specifying the number of points for interpolation along the x-axis. Default is 2000.}
 
 \item{title}{Optional character string to add a title to the plot.}
+
+\item{add_points}{Logical value indicating whether to add raw observations to the plot for \code{type = 3 and 4}. Default is \code{FALSE}.}
 
 \item{add_ci}{Logical value indicating whether to add confidence intervals for \code{type = 4, 5, 6}. Default is \code{TRUE}.}
 
@@ -85,7 +91,7 @@ mod_1 <- dt_potato |>
     x = DAP,
     y = Canopy,
     grp = Plot,
-    fn = "fn_linear_sat",
+    fn = "fn_lin_plat",
     parameters = c(t1 = 45, t2 = 80, k = 0.9),
     subset = c(1:3)
   )

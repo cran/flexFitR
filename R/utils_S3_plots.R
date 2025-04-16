@@ -4,7 +4,7 @@
 #' the calculated Area Under the Curve (AUC) and parameter values. The aim of `plot_fn` is to allow users to play with
 #' different starting values in their functions before fitting any models.
 #'
-#' @param fn A character string representing the name of the function to be plotted. Default is "fn_linear_sat".
+#' @param fn A character string representing the name of the function to be plotted. Default is "fn_lin_plat".
 #' @param params A named numeric vector of parameters to be passed to the function. Default is \code{c(t1 = 34.9, t2 = 61.8, k = 100)}.
 #' @param interval A numeric vector of length 2 specifying the interval over which the function is to be plotted. Default is \code{c(0, 100)}.
 #' @param n_points An integer specifying the number of points to be used for plotting. Default is 1000.
@@ -23,7 +23,7 @@
 #' @examples
 #' # Example usage
 #' plot_fn(
-#'   fn = "fn_linear_sat",
+#'   fn = "fn_lin_plat",
 #'   params = c(t1 = 34.9, t2 = 61.8, k = 100),
 #'   interval = c(0, 100),
 #'   n_points = 1000
@@ -35,7 +35,7 @@
 #'   n_points = 1000,
 #'   base_size = 12
 #' )
-plot_fn <- function(fn = "fn_linear_sat",
+plot_fn <- function(fn = "fn_lin_plat",
                     params = c(t1 = 34.9, t2 = 61.8, k = 100),
                     interval = c(0, 100),
                     n_points = 1000,
@@ -112,11 +112,13 @@ plot_fn <- function(fn = "fn_linear_sat",
 #' }
 #' @param label_size Numeric value for the size of labels. Default is 4.
 #' @param base_size Numeric value for the base font size in pts. Default is 14.
+#' @param linewidth Numeric value specifying size of line geoms. Default is 0.5.
 #' @param color Character string specifying the color for the fitted line when \code{type = 1}. Default is "red".
 #' @param color_points Character string specifying the color for the raw data points when \code{type = 1}. Default is "black".
 #' @param parm Character vector specifying the parameters to plot for \code{type = 2}. If \code{NULL}, all parameters are included.
 #' @param n_points Numeric value specifying the number of points for interpolation along the x-axis. Default is 2000.
 #' @param title Optional character string to add a title to the plot.
+#' @param add_points Logical value indicating whether to add raw observations to the plot for \code{type = 3 and 4}. Default is \code{FALSE}.
 #' @param add_ci Logical value indicating whether to add confidence intervals for \code{type = 4, 5, 6}. Default is \code{TRUE}.
 #' @param color_ci Character string specifying the color of the confidence interval when \code{type = 4, 5, 6}. Default is "blue".
 #' @param color_pi Character string specifying the color of the prediction interval when \code{type = 4}. Default is "red".
@@ -138,7 +140,7 @@ plot_fn <- function(fn = "fn_linear_sat",
 #'     x = DAP,
 #'     y = Canopy,
 #'     grp = Plot,
-#'     fn = "fn_linear_sat",
+#'     fn = "fn_lin_plat",
 #'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
 #'     subset = c(1:3)
 #'   )
@@ -154,11 +156,13 @@ plot.modeler <- function(x,
                          type = 1,
                          label_size = 4,
                          base_size = 14,
+                         linewidth = 0.5,
                          color = "red",
                          color_points = "black",
                          parm = NULL,
                          n_points = 1000,
                          title = NULL,
+                         add_points = FALSE,
                          add_ci = TRUE,
                          color_ci = "blue",
                          color_pi = "red",
@@ -177,47 +181,50 @@ plot.modeler <- function(x,
   max_x <- max(dt$x, na.rm = TRUE)
   min_x <- min(dt$x, na.rm = TRUE)
   sq <- seq(min_x, max_x, length.out = n_points)
-  # List of models
-  expand_by_grp <- function(fit, seq) {
-    curve <- fit$fn_name
-    .fn <- create_call(curve)
-    .uid <- fit$uid
-    .param <- pull(fit$type, value, parameter)
-    .func_dt <- data.frame(uid = .uid, x = seq, t(.param)) |>
-      group_by(x, uid) |>
-      mutate(dens = !!.fn, fn_name = curve) |>
-      ungroup() |>
-      dplyr::select(uid, x, dens, fn_name)
-    return(.func_dt)
-  }
-  fit_list <- x$fit
-  pos <- which(unlist(lapply(fit_list, function(x) x$uid)) %in% id)
-  fit_list <- fit_list[pos]
-  # Density
-  func_dt <- do.call(
-    what = rbind,
-    args = lapply(X = fit_list, FUN = expand_by_grp, seq = sq)
-  ) |>
-    as_tibble()
   dt <- droplevels(filter(dt, uid %in% id))
   label <- unique(dt$var)
-  functions <- unique(func_dt$fn_name)
+  functions <- unique(x$fun)
+  n_funs <- length(functions)
+  n_ids <- length(id)
+  if (type %in% c(1, 3)) {
+    expand_by_grp <- function(fit, seq) {
+      curve <- fit$fn_name
+      .fn <- create_call(curve)
+      .uid <- fit$uid
+      .param <- pull(fit$type, value, parameter)
+      .func_dt <- data.frame(uid = .uid, x = seq, t(.param)) |>
+        mutate(dens = !!.fn, fn_name = curve) |>
+        dplyr::select(uid, x, dens, fn_name)
+      return(.func_dt)
+    }
+    fit_list <- x$fit
+    pos <- which(unlist(lapply(fit_list, function(x) x$uid)) %in% id)
+    fit_list <- fit_list[pos]
+    func_dt <- do.call(
+      what = rbind,
+      args = lapply(X = fit_list, FUN = expand_by_grp, seq = sq)
+    ) |>
+      as_tibble() |>
+      dplyr::mutate(grp = paste0(uid, "_", fn_name)) |>
+      dplyr::mutate(uid = as.factor(uid))
+  }
 
   if (type == 1) {
     p0 <- dt |>
       ggplot() +
       geom_point(aes(x = x, y = y), color = color_points) +
       {
-        if (length(functions) == 1) {
+        if (n_funs == 1) {
           geom_line(
             data = func_dt,
             mapping = aes(x = x, y = dens, group = fn_name, linetype = fn_name),
-            color = color
+            color = color,
+            linewidth = linewidth
           )
         }
       } +
       {
-        if (length(functions) > 1) {
+        if (n_funs > 1) {
           geom_line(
             data = func_dt,
             mapping = aes(
@@ -226,18 +233,19 @@ plot.modeler <- function(x,
               group = fn_name,
               linetype = fn_name,
               color = fn_name
-            )
+            ),
+            linewidth = linewidth
           )
         }
       } +
       theme_classic(base_size = base_size) +
       labs(y = label, title = title)
-    if (length(id) > 1) {
+    if (n_ids > 1) {
       p0 <- p0 + facet_wrap(~uid)
     }
-    if (length(functions) == 1) {
+    if (n_funs == 1) {
       p0 <- p0 + theme(legend.position = "none")
-    } else if (length(functions) > 1) {
+    } else if (n_funs > 1) {
       p0 <- p0 +
         scale_color_brewer(type = "qual", palette = "Dark2") +
         labs(color = "Model", linetype = "Model")
@@ -253,29 +261,30 @@ plot.modeler <- function(x,
       labs(x = "Group", title = title) +
       theme_classic(base_size = base_size) +
       theme(axis.text.x = element_text(size = label_size))
-    if (length(functions) > 1) {
+    if (n_funs > 1) {
       p0 <- p0 + facet_wrap(fn_name ~ coefficient, scales = "free_y")
     }
   }
   if (type == 3) {
     p0 <- dt |>
       ggplot() +
+      {
+        if (add_points) {
+          geom_point(mapping = aes(x = x, y = y), alpha = 0.1)
+        }
+      } +
       geom_line(
         data = func_dt,
-        mapping = aes(
-          x = x,
-          y = dens,
-          group = paste0(uid, "_", fn_name),
-          color = as.factor(uid)
-        ),
+        mapping = aes(x = x, y = dens, group = grp, color = uid),
+        linewidth = linewidth
       ) +
       theme_classic(base_size = base_size) +
       labs(y = label, color = "uid", title = title) +
       scale_color_viridis_d(option = "D", direction = 1)
-    if (length(functions) > 1) {
+    if (n_funs > 1) {
       p0 <- p0 + facet_wrap(~fn_name)
     }
-    if (length(functions) == 1) {
+    if (n_funs == 1) {
       p0 <- p0 + theme(legend.position = "none")
     }
   }
@@ -316,7 +325,8 @@ plot.modeler <- function(x,
         ci_upper = predicted.value - qt((1 - 0.95) / 2, df) * std.error,
         pi_lower = predicted.value + qt((1 - 0.95) / 2, df) * std.error.p,
         pi_upper = predicted.value - qt((1 - 0.95) / 2, df) * std.error.p
-      )
+      ) |>
+      dplyr::mutate(grp = paste0(uid, "_", fn_name))
     p0 <- dt_ci |>
       ggplot() +
       {
@@ -347,64 +357,61 @@ plot.modeler <- function(x,
           )
         }
       } +
-      geom_line(
-        mapping = aes(
-          x = x_new,
-          y = predicted.value,
-          group = paste0(uid, "_", fn_name)
-        ),
-        color = "black"
-      ) +
       {
-        if (add_ci) {
+        if (n_funs > 1 && !add_ci && !add_ribbon_ci && !add_ribbon_pi) {
           geom_line(
             mapping = aes(
               x = x_new,
-              y = ci_lower,
-              group = paste0(uid, "_", fn_name)
+              y = predicted.value,
+              group = fn_name,
+              linetype = fn_name,
+              color = fn_name
             ),
-            linetype = 2,
-            color = color_ci
+            linewidth = linewidth
+          )
+        } else {
+          geom_line(
+            mapping = aes(x = x_new, y = predicted.value, group = grp),
+            linewidth = linewidth,
+            color = "black"
           )
         }
       } +
       {
         if (add_ci) {
-          geom_line(
-            mapping = aes(
-              x = x_new,
-              y = ci_upper,
-              group = paste0(uid, "_", fn_name)
+          list(
+            geom_line(
+              mapping = aes(x = x_new, y = ci_lower, group = grp),
+              linetype = 2,
+              color = color_ci
             ),
-            linetype = 2,
-            color = color_ci
+            geom_line(
+              mapping = aes(x = x_new, y = ci_upper, group = grp),
+              linetype = 2,
+              color = color_ci
+            )
           )
         }
       } +
       {
         if (add_ci && type == 4) {
-          geom_line(
-            mapping = aes(
-              x = x_new,
-              y = pi_lower,
-              group = paste0(uid, "_", fn_name)
+          list(
+            geom_line(
+              mapping = aes(x = x_new, y = pi_lower, group = grp),
+              linetype = 2,
+              color = color_pi
             ),
-            linetype = 2,
-            color = color_pi
+            geom_line(
+              mapping = aes(x = x_new, y = pi_upper, group = grp),
+              linetype = 2,
+              color = color_pi
+            )
           )
         }
       } +
       {
-        if (add_ci && type == 4) {
-          geom_line(
-            mapping = aes(
-              x = x_new,
-              y = pi_upper,
-              group = paste0(uid, "_", fn_name)
-            ),
-            linetype = 2,
-            color = color_pi
-          )
+        if (add_points && type == 4) {
+          geom_point(data = dt, mapping = aes(x = x, y = y), alpha = 0.5)
         }
       } +
       theme_classic(base_size = base_size) +
@@ -413,19 +420,25 @@ plot.modeler <- function(x,
         x = "x",
         color = "Model",
         fill = "Model",
+        linetype = "Model",
         title = ifelse(is.null(title), title_tmp, title)
       )
-    if (length(functions) == 1 && length(id) == 1) {
+    if (n_funs == 1 && n_ids == 1) {
       p0 <- p0
     }
-    if (length(functions) > 1 && length(id) == 1) {
+    if (n_funs > 1 && n_ids == 1) {
       p0 <- p0 + facet_grid(~fn_name)
     }
-    if (length(functions) == 1 && length(id) > 1) {
+    if (n_funs == 1 && n_ids > 1) {
       p0 <- p0 + facet_grid(~uid)
     }
-    if (length(functions) > 1 && length(id) > 1) {
+    if (n_funs > 1 && n_ids > 1) {
       p0 <- p0 + facet_grid(uid ~ fn_name)
+    }
+    if (n_funs > 1 && !add_ci && !add_ribbon_ci && !add_ribbon_pi) {
+      p0 <- p0 +
+        facet_wrap(~uid) +
+        scale_color_brewer(type = "qual", palette = "Dark2")
     }
   }
   return(p0)

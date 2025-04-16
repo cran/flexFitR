@@ -101,7 +101,7 @@ info_criteria <- function(object, metrics = "all", metadata = TRUE, digits = 2) 
 #'     x = DAP,
 #'     y = Canopy,
 #'     grp = Plot,
-#'     fn = "fn_linear_sat",
+#'     fn = "fn_lin_plat",
 #'     parameters = c(t1 = 45, t2 = 80, k = 90),
 #'     subset = 40
 #'   )
@@ -113,7 +113,7 @@ info_criteria <- function(object, metrics = "all", metadata = TRUE, digits = 2) 
 #'     y = Canopy,
 #'     grp = Plot,
 #'     fn = "fn_logistic",
-#'     parameters = c(L = 100, k = 4, t0 = 50),
+#'     parameters = c(a = 0.199, t0 = 47.7, k = 100),
 #'     subset = 40
 #'   )
 #' print(mod_2)
@@ -154,7 +154,8 @@ performance <- function(..., metrics = "all", metadata = FALSE, digits = 2) {
 #' \describe{
 #'   \item{\code{type = 1}}{Radar plot by uid}
 #'   \item{\code{type = 2}}{Radar plot averaging}
-#'   \item{\code{type = 3}}{Bar plot by model-metric}
+#'   \item{\code{type = 3}}{Line plot by model-metric}
+#'   \item{\code{type = 4}}{Ranking plot by model}
 #' }
 #' @param rescale Logical. If \code{TRUE}, metrics in type 3 plot are (0, 1) rescaled to improve interpretation.
 #' Higher values are better models. \code{FALSE} by default.
@@ -176,7 +177,7 @@ performance <- function(..., metrics = "all", metadata = FALSE, digits = 2) {
 #'     x = DAP,
 #'     y = Canopy,
 #'     grp = Plot,
-#'     fn = "fn_linear_sat",
+#'     fn = "fn_lin_plat",
 #'     parameters = c(t1 = 45, t2 = 80, k = 90),
 #'     subset = 40
 #'   )
@@ -187,7 +188,7 @@ performance <- function(..., metrics = "all", metadata = FALSE, digits = 2) {
 #'     y = Canopy,
 #'     grp = Plot,
 #'     fn = "fn_logistic",
-#'     parameters = c(L = 100, k = 4, t0 = 50),
+#'     parameters = c(a = 0.199, t0 = 47.7, k = 100),
 #'     subset = 40
 #'   )
 #' # Model 3
@@ -282,16 +283,7 @@ plot.performance <- function(x,
   if (type == 2) {
     .data <- .data |>
       group_by(fn_name, name) |>
-      summarise(value = mean(value)) |>
-      group_by(name) |>
-      mutate(
-        o_min = min(value, na.rm = TRUE),
-        o_max = max(value, na.rm = TRUE),
-        res = (value - o_min) / (o_max - o_min) * (n_max - n_min) + n_min
-      ) |>
-      na.omit() |>
-      mutate(res = ifelse(name %in% .positive, 1.1 - res, res)) |>
-      mutate(fn_name = as.factor(fn_name), name = factor(name, levels = .slt))
+      summarise(res = mean(res, na.rm = TRUE), .groups = "drop")
     p <- .data |>
       ggplot(
         mapping = aes(
@@ -329,6 +321,28 @@ plot.performance <- function(x,
       labs(y = NULL, x = NULL, color = "uid") +
       theme(axis.text.x = element_text(hjust = 1, angle = 75)) +
       scale_color_viridis_d(option = "D", direction = 1)
+  }
+  if (type == 4) {
+    p <- .data |>
+      group_by(uid, fn_name) |>
+      summarise(k = mean(res), .groups = "drop") |>
+      ungroup() |>
+      group_by(uid) |>
+      mutate(rank = rank(-k)) |>
+      group_by(fn_name, rank) |>
+      summarise(freq = n(), .groups = "drop") |>
+      group_by(fn_name) |>
+      mutate(freq = freq / sum(freq) * 100) |>
+      ggplot(aes(x = rank, y = freq, fill = fn_name)) +
+      geom_bar(stat = "identity", alpha = 0.5, color = "black") +
+      theme_classic() +
+      scale_color_brewer(type = "qual", palette = "Dark2") +
+      scale_fill_brewer(type = "qual", palette = "Dark2") +
+      geom_text(
+        mapping = aes(label = round(freq, 1)),
+        position = position_stack(vjust = 0.5)
+      ) +
+      labs(y = "Frequency (%)", fill = "Model", x = "Rank")
   }
   if (return_table) {
     return(.data)
@@ -377,7 +391,7 @@ plot.performance <- function(x,
 #'     x = DAP,
 #'     y = Canopy,
 #'     grp = Plot,
-#'     fn = "fn_linear_sat",
+#'     fn = "fn_lin_plat",
 #'     parameters = c(t1 = 45, t2 = 80, k = 0.9),
 #'     subset = c(1:2)
 #'   )

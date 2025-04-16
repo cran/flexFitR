@@ -25,7 +25,8 @@ This argument is not used when type = 2.}
 \describe{
   \item{\code{type = 1}}{Radar plot by uid}
   \item{\code{type = 2}}{Radar plot averaging}
-  \item{\code{type = 3}}{Bar plot by model-metric}
+  \item{\code{type = 3}}{Line plot by model-metric}
+  \item{\code{type = 4}}{Ranking plot by model}
 }}
 
 \item{rescale}{Logical. If \code{TRUE}, metrics in type 3 plot are (0, 1) rescaled to improve interpretation.
@@ -55,7 +56,7 @@ mod_1 <- dt_potato |>
     x = DAP,
     y = Canopy,
     grp = Plot,
-    fn = "fn_linear_sat",
+    fn = "fn_lin_plat",
     parameters = c(t1 = 45, t2 = 80, k = 90),
     subset = 40
   )
@@ -66,7 +67,7 @@ mod_2 <- dt_potato |>
     y = Canopy,
     grp = Plot,
     fn = "fn_logistic",
-    parameters = c(L = 100, k = 4, t0 = 50),
+    parameters = c(a = 0.199, t0 = 47.7, k = 100),
     subset = 40
   )
 # Model 3

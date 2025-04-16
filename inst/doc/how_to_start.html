@@ -396,8 +396,8 @@ to our coefficient b and coefficient m.</p>
 <span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt;    1 -15.5 19.5 449</span></span>
 <span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt;       1 0.4141 secs        100%   259 (id)</span></span></code></pre></div>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt;  Groups     Timing Convergence Iterations</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt;       1 0.053 secs        100%   354 (id)</span></span></code></pre></div>
 <p>Once the model is fitted, we can examine the output, extract the
 estimated parameters, make some plots, and predict new x values.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">plot</span>(mod, <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">title =</span> <span class="st">&quot;Raw data&quot;</span>)</span>
@@ -479,15 +479,16 @@ we have a piece-wise regression, parameterized by <code>t1</code>,
 <code>t2</code>, and <code>k</code>, and defined by the following
 expression:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>fun <span class="ot">&lt;-</span> <span class="cf">function</span>(t, <span class="at">t1 =</span> <span class="dv">45</span>, <span class="at">t2 =</span> <span class="dv">80</span>, <span class="at">k =</span> <span class="fl">0.9</span>) {</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="cf">if</span> (t <span class="sc">&lt;</span> t1) {</span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (t <span class="sc">&gt;=</span> t1 <span class="sc">&amp;&amp;</span> t <span class="sc">&lt;=</span> t2) {</span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>    y <span class="ot">&lt;-</span> k <span class="sc">/</span> (t2 <span class="sc">-</span> t1) <span class="sc">*</span> (t <span class="sc">-</span> t1)</span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>    y <span class="ot">&lt;-</span> k</span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  }</span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">return</span>(y)</span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="fu">ifelse</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>    <span class="at">test =</span> t <span class="sc">&lt;</span> t1,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>    <span class="at">yes =</span> <span class="dv">0</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>    <span class="at">no =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>      <span class="at">test =</span> t <span class="sc">&gt;=</span> t1 <span class="sc">&amp;</span> t <span class="sc">&lt;=</span> t2,</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>      <span class="at">yes =</span> k <span class="sc">/</span> (t2 <span class="sc">-</span> t1) <span class="sc">*</span> (t <span class="sc">-</span> t1),</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>      <span class="at">no =</span> k</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>    )</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  )</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>}</span></code></pre></div>
 <p>Before fitting the model, let’s take a look at the example
 dataset.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
@@ -505,7 +506,7 @@ using the <code>modeler</code> function.</p>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>    <span class="at">x =</span> time,</span>
 <span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>    <span class="at">y =</span> variable,</span>
 <span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fun&quot;</span>,</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>    <span class="at">parameters =</span> <span class="fu">c</span>(<span class="at">t1 =</span> <span class="dv">45</span>, <span class="at">t2 =</span> <span class="dv">80</span>, <span class="at">k =</span> <span class="dv">90</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>    <span class="at">parameters =</span> <span class="fu">c</span>(<span class="at">t1 =</span> <span class="dv">40</span>, <span class="at">t2 =</span> <span class="dv">70</span>, <span class="at">k =</span> <span class="dv">100</span>)</span>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>  )</span>
 <span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>mod_1</span>
 <span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -522,7 +523,7 @@ using the <code>modeler</code> function.</p>
 <span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
 <span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt;       1 0.4356 secs        100%   511 (id)</span></span></code></pre></div>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt;       1 0.0715 secs        100%   473 (id)</span></span></code></pre></div>
 <p>After fitting the model, we can examine the results, plot the fitted
 curve, extract the coefficients and their associated p-values, obtain
 the variance-covariance matrix, and make predictions for unknown values
@@ -541,9 +542,9 @@ of x.</p>
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">vcov</span>(mod_1)</span>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="co">#&gt; $`1`</span></span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co">#&gt;               t1           t2            k</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">#&gt; t1  6.061705e-03 -0.002940001 1.877072e-07</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">#&gt; t1  6.061705e-03 -0.002940001 1.877076e-07</span></span>
 <span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co">#&gt; t2 -2.940001e-03  0.008431400 4.204939e-03</span></span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="co">#&gt; k   1.877072e-07  0.004204939 1.870426e-02</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="co">#&gt; k   1.877076e-07  0.004204939 1.870426e-02</span></span>
 <span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co">#&gt; attr(,&quot;fn_name&quot;)</span></span>
 <span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;fun&quot;</span></span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># Making predictions</span></span>
@@ -552,9 +553,46 @@ of x.</p>
 <span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="co">#&gt;     uid fn_name x_new predicted.value std.error</span></span>
 <span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;           &lt;dbl&gt;     &lt;dbl&gt;</span></span>
 <span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="co">#&gt; 1     1 fun        45            28.5     0.223</span></span></code></pre></div>
-<p>Finally, we illustrate how to provide different initial values to the
-function when dealing with multiple groups, and we also show how to fix
-some parameters of the objective function.</p>
+<div id="comparison-with-nls" class="section level3">
+<h3>Comparison with <code>nls</code></h3>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>mod_nls <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  <span class="fu">nls</span>(</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>    <span class="at">formula =</span> variable <span class="sc">~</span> <span class="fu">fun</span>(time, t1, t2, k),</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>    <span class="at">start =</span> <span class="fu">c</span>(<span class="at">t1 =</span> <span class="dv">40</span>, <span class="at">t2 =</span> <span class="dv">70</span>, <span class="at">k =</span> <span class="dv">100</span>),</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>    <span class="at">algorithm =</span> <span class="st">&quot;default&quot;</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>  )</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="fu">summary</span>(mod_nls)</span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a><span class="co">#&gt; Formula: variable ~ fun(time, t1, t2, k)</span></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a><span class="co">#&gt; Parameters:</span></span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a><span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a><span class="co">#&gt; t1 38.60286    0.07786   495.8 4.54e-15 ***</span></span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a><span class="co">#&gt; t2 61.04288    0.09183   664.7 7.82e-16 ***</span></span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="co">#&gt; k  99.81000    0.13676   729.8 4.47e-16 ***</span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.2735 on 6 degrees of freedom</span></span>
+<span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a><span class="co">#&gt; Number of iterations to convergence: 4 </span></span>
+<span id="cb21-22"><a href="#cb21-22" tabindex="-1"></a><span class="co">#&gt; Achieved convergence tolerance: 3.927e-06</span></span>
+<span id="cb21-23"><a href="#cb21-23" tabindex="-1"></a><span class="fu">coef</span>(mod_nls)</span>
+<span id="cb21-24"><a href="#cb21-24" tabindex="-1"></a><span class="co">#&gt;       t1       t2        k </span></span>
+<span id="cb21-25"><a href="#cb21-25" tabindex="-1"></a><span class="co">#&gt; 38.60286 61.04288 99.81000</span></span>
+<span id="cb21-26"><a href="#cb21-26" tabindex="-1"></a><span class="fu">vcov</span>(mod_nls)</span>
+<span id="cb21-27"><a href="#cb21-27" tabindex="-1"></a><span class="co">#&gt;               t1           t2             k</span></span>
+<span id="cb21-28"><a href="#cb21-28" tabindex="-1"></a><span class="co">#&gt; t1  6.062452e-03 -0.002940973 -6.025873e-13</span></span>
+<span id="cb21-29"><a href="#cb21-29" tabindex="-1"></a><span class="co">#&gt; t2 -2.940973e-03  0.008433026  4.205209e-03</span></span>
+<span id="cb21-30"><a href="#cb21-30" tabindex="-1"></a><span class="co">#&gt; k  -6.025873e-13  0.004205209  1.870417e-02</span></span>
+<span id="cb21-31"><a href="#cb21-31" tabindex="-1"></a><span class="fu">predict</span>(mod_nls, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">time =</span> <span class="dv">45</span>))</span>
+<span id="cb21-32"><a href="#cb21-32" tabindex="-1"></a><span class="co">#&gt; [1] 28.45357</span></span></code></pre></div>
+<p>As we can see, we get very similar results when compared to
+<code>nls</code>.</p>
+<p>Finally, we will illustrate how to provide different initial values
+to the function when dealing with multiple groups, and we will also show
+how to fix some parameters of the objective function.</p>
+</div>
 <div id="providing-initial-values" class="section level3">
 <h3>Providing Initial values</h3>
 <p>In this example, we don’t have a grouping variable. However, by
@@ -563,80 +601,80 @@ the dataset. Because of this, we need to specify <code>uid = 1</code>
 for the initial values and fixed parameters. If there is only one group,
 you only need to modify the parameters argument accordingly. This
 approach is primarily for illustrative purposes.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>init <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">uid =</span> <span class="dv">1</span>, <span class="at">t1 =</span> <span class="dv">20</span>, <span class="at">t2 =</span> <span class="dv">30</span>, <span class="at">k =</span> <span class="fl">0.8</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>mod_2 <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span></span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="fu">modeler</span>(</span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>    <span class="at">x =</span> time,</span>
-<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>    <span class="at">y =</span> variable,</span>
-<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fun&quot;</span>,</span>
-<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>    <span class="at">parameters =</span> init</span>
-<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>  )</span>
-<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a>mod_2</span>
-<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a><span class="co">#&gt; variable ~ fun(time, t1, t2, k) </span></span>
-<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="co">#&gt; Residuals (`Standardized`):</span></span>
-<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
-<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="co">#&gt;  0.0000  0.0000  0.0000  0.2722  0.0000  2.4495 </span></span>
-<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a><span class="co">#&gt; Optimization Results `head()`:</span></span>
-<span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a><span class="co">#&gt;  uid   t1 t2    k   sse</span></span>
-<span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a><span class="co">#&gt;    1 38.6 61 99.8 0.449</span></span>
-<span id="cb21-22"><a href="#cb21-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb21-23"><a href="#cb21-23" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
-<span id="cb21-24"><a href="#cb21-24" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb21-25"><a href="#cb21-25" tabindex="-1"></a><span class="co">#&gt;       1 0.4473 secs        100%   567 (id)</span></span>
-<span id="cb21-26"><a href="#cb21-26" tabindex="-1"></a><span class="fu">coef</span>(mod_2)</span>
-<span id="cb21-27"><a href="#cb21-27" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 7</span></span>
-<span id="cb21-28"><a href="#cb21-28" tabindex="-1"></a><span class="co">#&gt;     uid fn_name coefficient solution std.error `t value` `Pr(&gt;|t|)`</span></span>
-<span id="cb21-29"><a href="#cb21-29" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
-<span id="cb21-30"><a href="#cb21-30" tabindex="-1"></a><span class="co">#&gt; 1     1 fun     t1              38.6    0.0779      496.   4.54e-15</span></span>
-<span id="cb21-31"><a href="#cb21-31" tabindex="-1"></a><span class="co">#&gt; 2     1 fun     t2              61.0    0.0918      665.   7.82e-16</span></span>
-<span id="cb21-32"><a href="#cb21-32" tabindex="-1"></a><span class="co">#&gt; 3     1 fun     k               99.8    0.137       730.   4.47e-16</span></span></code></pre></div>
-</div>
-<div id="fixing-parameters" class="section level3">
-<h3>Fixing parameters</h3>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>fix <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">uid =</span> <span class="dv">1</span>, <span class="at">k =</span> <span class="dv">98</span>)</span>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>init <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">uid =</span> <span class="dv">1</span>, <span class="at">t1 =</span> <span class="dv">20</span>, <span class="at">t2 =</span> <span class="dv">30</span>, <span class="at">k =</span> <span class="fl">0.8</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>mod_3 <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>mod_2 <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span></span>
 <span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>  <span class="fu">modeler</span>(</span>
 <span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>    <span class="at">x =</span> time,</span>
 <span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>    <span class="at">y =</span> variable,</span>
 <span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fun&quot;</span>,</span>
-<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a>    <span class="at">parameters =</span> <span class="fu">c</span>(<span class="at">t1 =</span> <span class="dv">45</span>, <span class="at">t2 =</span> <span class="dv">80</span>, <span class="at">k =</span> <span class="dv">90</span>),</span>
-<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a>    <span class="at">fixed_params =</span> fix</span>
-<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a>  )</span>
-<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a>mod_3</span>
-<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a><span class="co">#&gt; variable ~ fun(time, t1, t2, k) </span></span>
-<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a><span class="co">#&gt; Residuals (`Standardized`):</span></span>
-<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
-<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="co">#&gt;  0.0000  0.0000  0.4815  0.6316  1.3008  1.3008 </span></span>
-<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a><span class="co">#&gt; Optimization Results `head()`:</span></span>
-<span id="cb22-21"><a href="#cb22-21" tabindex="-1"></a><span class="co">#&gt;  uid   t1   t2  sse  k</span></span>
-<span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a><span class="co">#&gt;    1 38.6 60.6 13.6 98</span></span>
-<span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
-<span id="cb22-25"><a href="#cb22-25" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb22-26"><a href="#cb22-26" tabindex="-1"></a><span class="co">#&gt;       1 0.4199 secs        100%   321 (id)</span></span>
-<span id="cb22-27"><a href="#cb22-27" tabindex="-1"></a><span class="fu">coef</span>(mod_3)</span>
-<span id="cb22-28"><a href="#cb22-28" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 7</span></span>
-<span id="cb22-29"><a href="#cb22-29" tabindex="-1"></a><span class="co">#&gt;     uid fn_name coefficient solution std.error `t value` `Pr(&gt;|t|)`</span></span>
-<span id="cb22-30"><a href="#cb22-30" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
-<span id="cb22-31"><a href="#cb22-31" tabindex="-1"></a><span class="co">#&gt; 1     1 fun     t1              38.6     0.396      97.5   3.15e-12</span></span>
-<span id="cb22-32"><a href="#cb22-32" tabindex="-1"></a><span class="co">#&gt; 2     1 fun     t2              60.6     0.429     141.    2.34e-13</span></span>
-<span id="cb22-33"><a href="#cb22-33" tabindex="-1"></a><span class="fu">plot</span>(mod_3)</span></code></pre></div>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a>    <span class="at">parameters =</span> init</span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a>  )</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a>mod_2</span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="co">#&gt; variable ~ fun(time, t1, t2, k) </span></span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a><span class="co">#&gt; Residuals (`Standardized`):</span></span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a><span class="co">#&gt;  0.0000  0.0000  0.0000  0.2722  0.0000  2.4495 </span></span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a><span class="co">#&gt; Optimization Results `head()`:</span></span>
+<span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a><span class="co">#&gt;  uid   t1 t2    k   sse</span></span>
+<span id="cb22-21"><a href="#cb22-21" tabindex="-1"></a><span class="co">#&gt;    1 38.6 61 99.8 0.449</span></span>
+<span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
+<span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
+<span id="cb22-25"><a href="#cb22-25" tabindex="-1"></a><span class="co">#&gt;       1 0.0938 secs        100%   567 (id)</span></span>
+<span id="cb22-26"><a href="#cb22-26" tabindex="-1"></a><span class="fu">coef</span>(mod_2)</span>
+<span id="cb22-27"><a href="#cb22-27" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 7</span></span>
+<span id="cb22-28"><a href="#cb22-28" tabindex="-1"></a><span class="co">#&gt;     uid fn_name coefficient solution std.error `t value` `Pr(&gt;|t|)`</span></span>
+<span id="cb22-29"><a href="#cb22-29" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span id="cb22-30"><a href="#cb22-30" tabindex="-1"></a><span class="co">#&gt; 1     1 fun     t1              38.6    0.0779      496.   4.54e-15</span></span>
+<span id="cb22-31"><a href="#cb22-31" tabindex="-1"></a><span class="co">#&gt; 2     1 fun     t2              61.0    0.0918      665.   7.82e-16</span></span>
+<span id="cb22-32"><a href="#cb22-32" tabindex="-1"></a><span class="co">#&gt; 3     1 fun     k               99.8    0.137       730.   4.47e-16</span></span></code></pre></div>
+</div>
+<div id="fixing-parameters" class="section level3">
+<h3>Fixing parameters</h3>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>fix <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">uid =</span> <span class="dv">1</span>, <span class="at">k =</span> <span class="dv">98</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>mod_3 <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>  <span class="fu">modeler</span>(</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>    <span class="at">x =</span> time,</span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>    <span class="at">y =</span> variable,</span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fun&quot;</span>,</span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>    <span class="at">parameters =</span> <span class="fu">c</span>(<span class="at">t1 =</span> <span class="dv">40</span>, <span class="at">t2 =</span> <span class="dv">70</span>, <span class="at">k =</span> <span class="dv">100</span>),</span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>    <span class="at">fixed_params =</span> fix</span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a>  )</span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a>mod_3</span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a><span class="co">#&gt; variable ~ fun(time, t1, t2, k) </span></span>
+<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a><span class="co">#&gt; Residuals (`Standardized`):</span></span>
+<span id="cb23-17"><a href="#cb23-17" tabindex="-1"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span id="cb23-18"><a href="#cb23-18" tabindex="-1"></a><span class="co">#&gt;  0.0000  0.0000  0.4815  0.6316  1.3008  1.3008 </span></span>
+<span id="cb23-19"><a href="#cb23-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-20"><a href="#cb23-20" tabindex="-1"></a><span class="co">#&gt; Optimization Results `head()`:</span></span>
+<span id="cb23-21"><a href="#cb23-21" tabindex="-1"></a><span class="co">#&gt;  uid   t1   t2  sse  k</span></span>
+<span id="cb23-22"><a href="#cb23-22" tabindex="-1"></a><span class="co">#&gt;    1 38.6 60.6 13.6 98</span></span>
+<span id="cb23-23"><a href="#cb23-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-24"><a href="#cb23-24" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
+<span id="cb23-25"><a href="#cb23-25" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
+<span id="cb23-26"><a href="#cb23-26" tabindex="-1"></a><span class="co">#&gt;       1 0.0567 secs        100%   313 (id)</span></span>
+<span id="cb23-27"><a href="#cb23-27" tabindex="-1"></a><span class="fu">coef</span>(mod_3)</span>
+<span id="cb23-28"><a href="#cb23-28" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 7</span></span>
+<span id="cb23-29"><a href="#cb23-29" tabindex="-1"></a><span class="co">#&gt;     uid fn_name coefficient solution std.error `t value` `Pr(&gt;|t|)`</span></span>
+<span id="cb23-30"><a href="#cb23-30" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span id="cb23-31"><a href="#cb23-31" tabindex="-1"></a><span class="co">#&gt; 1     1 fun     t1              38.6     0.396      97.5   3.15e-12</span></span>
+<span id="cb23-32"><a href="#cb23-32" tabindex="-1"></a><span class="co">#&gt; 2     1 fun     t2              60.6     0.429     141.    2.34e-13</span></span>
+<span id="cb23-33"><a href="#cb23-33" tabindex="-1"></a><span class="fu">plot</span>(mod_3)</span></code></pre></div>
 <p><img role="img" aria-label="Plot evolution" src="data:image/png;base64,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" alt="Plot evolution" /></p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">performance</span>(mod_1, mod_2, mod_3)</span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="co">#&gt;   fn_name uid df nobs p logLik   AIC  AICc   BIC Sigma   SSE  MAE  MSE RMSE R2</span></span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="co">#&gt; 1   fun_1   1  4    9 3   0.72  6.56 16.56  7.35  0.27  0.45 0.07 0.05 0.22  1</span></span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a><span class="co">#&gt; 2   fun_2   1  4    9 3   0.72  6.56 16.56  7.35  0.27  0.45 0.07 0.05 0.22  1</span></span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a><span class="co">#&gt; 3   fun_3   1  3    9 2 -14.61 35.23 40.03 35.82  1.39 13.55 0.88 1.51 1.23  1</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">performance</span>(mod_1, mod_2, mod_3)</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="co">#&gt;   fn_name uid df nobs p logLik   AIC  AICc   BIC Sigma   SSE  MAE  MSE RMSE R2</span></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="co">#&gt; 1   fun_1   1  4    9 3   0.72  6.56 16.56  7.35  0.27  0.45 0.07 0.05 0.22  1</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a><span class="co">#&gt; 2   fun_2   1  4    9 3   0.72  6.56 16.56  7.35  0.27  0.45 0.07 0.05 0.22  1</span></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="co">#&gt; 3   fun_3   1  3    9 2 -14.61 35.23 40.03 35.82  1.39 13.55 0.88 1.51 1.23  1</span></span></code></pre></div>
 <p>This vignette provided a basic introduction to using the flexFitR
 package, starting with simple examples such as linear regression and
 piecewise regression. The goal was to demonstrate the fundamental
