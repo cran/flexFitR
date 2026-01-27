@@ -597,7 +597,7 @@ plots.</p>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    <span class="at">x =</span> DAP,</span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    <span class="at">y =</span> GLI,</span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="at">grp =</span> Plot,</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_lin_pl_lin2&quot;</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">fn =</span> <span class="st">&quot;fn_lpl&quot;</span>,</span>
 <span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>    <span class="at">parameters =</span> initial_vals,</span>
 <span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    <span class="at">lower =</span> lower_bounds,</span>
 <span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>    <span class="at">upper =</span> upper_bounds,</span>
@@ -617,7 +617,7 @@ using the <code>plot</code> function:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">print</span>(mod_1)</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; GLI ~ fn_lin_pl_lin2(DAP, t1, t2, dt, k, beta) </span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; GLI ~ fn_lpl(DAP, t1, t2, dt, k, beta) </span></span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; Residuals (`Standardized`):</span></span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt;       Min.    1st Qu.     Median       Mean    3rd Qu.       Max. </span></span>
@@ -630,20 +630,20 @@ using the <code>plot</code> function:</p>
 <span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
 <span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt;       2 0.3747 secs        100%   311 (id)</span></span></code></pre></div>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt;       2 1.0695 secs        100%   311 (id)</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">plot</span>(mod_1, <span class="at">id =</span> <span class="fu">c</span>(<span class="dv">195</span>, <span class="dv">40</span>))</span></code></pre></div>
 <p><img role="img" aria-label="plot fit 1" src="data:image/png;base64,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" alt="plot fit 1" /></p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">kable</span>(mod_1<span class="sc">$</span>param)</span></code></pre></div>
 <table>
 <colgroup>
 <col width="5%" />
-<col width="11%" />
-<col width="11%" />
-<col width="11%" />
+<col width="12%" />
+<col width="12%" />
 <col width="12%" />
 <col width="14%" />
-<col width="12%" />
-<col width="19%" />
+<col width="15%" />
+<col width="14%" />
+<col width="11%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -666,7 +666,7 @@ using the <code>plot</code> function:</p>
 <td align="right">0.3691396</td>
 <td align="right">-0.0145414</td>
 <td align="right">0.0000196</td>
-<td align="left">fn_lin_pl_lin2</td>
+<td align="left">fn_lpl</td>
 </tr>
 <tr class="even">
 <td align="right">195</td>
@@ -676,7 +676,7 @@ using the <code>plot</code> function:</p>
 <td align="right">0.3251456</td>
 <td align="right">-0.0080876</td>
 <td align="right">0.0001388</td>
-<td align="left">fn_lin_pl_lin2</td>
+<td align="left">fn_lpl</td>
 </tr>
 </tbody>
 </table>
@@ -700,22 +700,22 @@ their variability.</li>
 </ul>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">coef</span>(mod_1, <span class="at">id =</span> <span class="dv">40</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 5 × 7</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt;     uid fn_name        coefficient solution std.error `t value`  `Pr(&gt;|t|)`</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; 1    40 fn_lin_pl_lin2 t1           37.3     0.258        145.  0.000000727</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; 2    40 fn_lin_pl_lin2 t2           64.4     0.371        174.  0.000000422</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; 3    40 fn_lin_pl_lin2 dt           19.5     0.626         31.2 0.0000725  </span></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; 4    40 fn_lin_pl_lin2 k             0.369   0.00256      144.  0.000000733</span></span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; 5    40 fn_lin_pl_lin2 beta         -0.0145  0.000452     -32.2 0.0000660</span></span></code></pre></div>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt;     uid fn_name coefficient solution std.error `t value`  `Pr(&gt;|t|)`</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; 1    40 fn_lpl  t1           37.3     0.258        145.  0.000000727</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; 2    40 fn_lpl  t2           64.4     0.371        174.  0.000000422</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; 3    40 fn_lpl  dt           19.5     0.626         31.2 0.0000725  </span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; 4    40 fn_lpl  k             0.369   0.00256      144.  0.000000733</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; 5    40 fn_lpl  beta         -0.0145  0.000452     -32.2 0.0000660</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">confint</span>(mod_1, <span class="at">id =</span> <span class="dv">40</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 5 × 7</span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt;     uid fn_name        coefficient solution std.error ci_lower ci_upper</span></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;</span></span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; 1    40 fn_lin_pl_lin2 t1           37.3     0.258     36.5     38.1   </span></span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; 2    40 fn_lin_pl_lin2 t2           64.4     0.371     63.2     65.6   </span></span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; 3    40 fn_lin_pl_lin2 dt           19.5     0.626     17.5     21.5   </span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; 4    40 fn_lin_pl_lin2 k             0.369   0.00256    0.361    0.377 </span></span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; 5    40 fn_lin_pl_lin2 beta         -0.0145  0.000452  -0.0160  -0.0131</span></span></code></pre></div>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt;     uid fn_name coefficient solution std.error ci_lower ci_upper</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; 1    40 fn_lpl  t1           37.3     0.258     36.5     38.1   </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; 2    40 fn_lpl  t2           64.4     0.371     63.2     65.6   </span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; 3    40 fn_lpl  dt           19.5     0.626     17.5     21.5   </span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; 4    40 fn_lpl  k             0.369   0.00256    0.361    0.377 </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; 5    40 fn_lpl  beta         -0.0145  0.000452  -0.0160  -0.0131</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">vcov</span>(mod_1, <span class="at">id =</span> <span class="dv">40</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; $`40`</span></span>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt;                 t1            t2            dt             k          beta</span></span>
@@ -725,7 +725,7 @@ their variability.</li>
 <span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; k    -7.841952e-08  4.797169e-04 -0.0009292910  6.536323e-06  8.415252e-11</span></span>
 <span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; beta -8.219226e-09  2.416003e-08 -0.0001699689  8.415252e-11  2.042313e-07</span></span>
 <span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; attr(,&quot;fn_name&quot;)</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;fn_lin_pl_lin2&quot;</span></span></code></pre></div>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;fn_lpl&quot;</span></span></code></pre></div>
 </div>
 <div id="plotting-options" class="section level2">
 <h2>4. Plotting options</h2>

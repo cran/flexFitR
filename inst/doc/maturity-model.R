@@ -45,7 +45,7 @@ mod_1 <- dt_potato |>
     x = DAP,
     y = GLI,
     grp = Plot,
-    fn = "fn_lin_pl_lin2",
+    fn = "fn_lpl",
     parameters = initial_vals,
     lower = lower_bounds,
     upper = upper_bounds,

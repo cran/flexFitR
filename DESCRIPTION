@@ -1,7 +1,7 @@
 Package: flexFitR
 Type: Package
 Title: Flexible Non-Linear Least Square Model Fitting
-Version: 1.2.1
+Version: 1.2.2
 Authors@R: 
     c(person(given = "Johan",
              family = "Aparicio",
@@ -32,6 +32,6 @@ Suggests: BB, dfoptim, ggpubr, kableExtra, knitr, lbfgsb3c, marqLevAlg,
         purrr, rmarkdown, ucminf
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2025-11-04 03:34:11 UTC; johan
+Packaged: 2026-01-27 19:35:18 UTC; johan
 Repository: CRAN
-Date/Publication: 2025-11-04 07:50:02 UTC
+Date/Publication: 2026-01-27 20:00:02 UTC

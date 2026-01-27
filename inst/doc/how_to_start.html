@@ -397,7 +397,7 @@ to our coefficient b and coefficient m.</p>
 <span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
 <span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt;       1 0.1925 secs        100%   354 (id)</span></span></code></pre></div>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt;       1 0.5774 secs        100%   354 (id)</span></span></code></pre></div>
 <p>Once the model is fitted, we can examine the output, extract the
 estimated parameters, make some plots, and predict new x values.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">plot</span>(mod, <span class="at">color =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">title =</span> <span class="st">&quot;Raw data&quot;</span>)</span>
@@ -527,7 +527,7 @@ using the <code>modeler</code> function.</p>
 <span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
 <span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt;       1 0.2369 secs        100%   473 (id)</span></span></code></pre></div>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt;       1 0.9754 secs        100%   473 (id)</span></span></code></pre></div>
 <p>After fitting the model, we can examine the results, plot the fitted
 curve, extract the coefficients and their associated p-values, obtain
 the variance-covariance matrix, and make predictions for unknown values
@@ -629,7 +629,7 @@ approach is primarily for illustrative purposes.</p>
 <span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
 <span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb22-25"><a href="#cb22-25" tabindex="-1"></a><span class="co">#&gt;       1 0.4331 secs        100%   567 (id)</span></span>
+<span id="cb22-25"><a href="#cb22-25" tabindex="-1"></a><span class="co">#&gt;       1 1.2995 secs        100%   567 (id)</span></span>
 <span id="cb22-26"><a href="#cb22-26" tabindex="-1"></a><span class="fu">coef</span>(mod_2)</span>
 <span id="cb22-27"><a href="#cb22-27" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 7</span></span>
 <span id="cb22-28"><a href="#cb22-28" tabindex="-1"></a><span class="co">#&gt;     uid fn_name coefficient solution std.error `t value` `Pr(&gt;|t|)`</span></span>
@@ -665,7 +665,7 @@ approach is primarily for illustrative purposes.</p>
 <span id="cb23-23"><a href="#cb23-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb23-24"><a href="#cb23-24" tabindex="-1"></a><span class="co">#&gt; Metrics:</span></span>
 <span id="cb23-25"><a href="#cb23-25" tabindex="-1"></a><span class="co">#&gt;  Groups      Timing Convergence Iterations</span></span>
-<span id="cb23-26"><a href="#cb23-26" tabindex="-1"></a><span class="co">#&gt;       1 0.2544 secs        100%   313 (id)</span></span>
+<span id="cb23-26"><a href="#cb23-26" tabindex="-1"></a><span class="co">#&gt;       1 0.7268 secs        100%   313 (id)</span></span>
 <span id="cb23-27"><a href="#cb23-27" tabindex="-1"></a><span class="fu">coef</span>(mod_3)</span>
 <span id="cb23-28"><a href="#cb23-28" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 7</span></span>
 <span id="cb23-29"><a href="#cb23-29" tabindex="-1"></a><span class="co">#&gt;     uid fn_name coefficient solution std.error `t value` `Pr(&gt;|t|)`</span></span>
